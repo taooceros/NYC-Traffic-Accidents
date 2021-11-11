@@ -1,0 +1,13 @@
+```{r}
+library(tidyverse)
+```
+
+```{r}
+
+accident <- read_csv("Project/Motor_Vehicle_Collisions_-_Crashes.csv")
+
+accident %>%
+    select("CONTRIBUTING FACTOR VEHICLE 1") %>%
+    group_by("CONTRIBUTING FACTOR VEHICLE 1") %>%
+    distinct()
+```

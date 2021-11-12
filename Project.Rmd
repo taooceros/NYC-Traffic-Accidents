@@ -9,7 +9,7 @@ library(lubridate)
 accident <- read_csv("Project/Motor_Vehicle_Collisions_-_Crashes.csv")
 ```
 
-```{r}
+```{r Basic Visualization}
 accident <- accident %>%
     mutate(
         `CRASH DATE` = mdy(`CRASH DATE`)
@@ -21,10 +21,45 @@ accident %>%
         `CRASH DATE max` = max(`CRASH DATE`)
     )
 
-accident %>%
+accident <- accident %>%
     mutate(
         `CRASH MONTH` = month(`CRASH DATE`),
         `CRASH YEAR` = year(`CRASH DATE`)
+    ) %>%
+    mutate(
+        Season = case_when(
+            `CRASH MONTH` %in% c(12, 1, 2) ~ "Winter",
+            `CRASH MONTH` %in% c(3, 4, 5) ~ "Spring",
+            `CRASH MONTH` %in% c(6, 7, 8) ~ "Summer",
+            TRUE ~ "Fall"
+        )
+    )
+
+accident %>%
+    count(
+        `CRASH YEAR`,
+        Season
+    ) %>%
+    ungroup() %>%
+    ggplot(aes(x = `CRASH YEAR`, y = n, color = Season)) +
+    geom_line() +
+    ggtitle("Number of Accidents", "Group By Season and Year")
+
+```
+
+```{r Model}
+
+models <- accident %>%
+    mutate(
+        `NUMBER OF PERSONS INJURED OR KILLED` =
+            `NUMBER OF PERSONS INJURED` + `NUMBER OF PERSONS KILLED`
+    ) %>%
+    group_by(Season) %>%
+    summarize(
+        Model = list(lm(
+            `NUMBER OF PERSONS INJURED OR KILLED` ~ `CRASH YEAR` + `LATITUDE` + `LONGITUDE`,
+            data = .
+        ))
     )
 ```
 

@@ -1,13 +1,72 @@
 ```{r}
 library(tidyverse)
+library(lubridate)
+
 ```
 
 ```{r}
 
 accident <- read_csv("Project/Motor_Vehicle_Collisions_-_Crashes.csv")
+```
 
+```{r}
+accident <- accident %>%
+    mutate(
+        `CRASH DATE` = mdy(`CRASH DATE`)
+    )
+
+accident %>%
+    summarize(
+        `CRASH DATE min` = min(`CRASH DATE`),
+        `CRASH DATE max` = max(`CRASH DATE`)
+    )
+
+accident %>%
+    mutate(
+        `CRASH MONTH` = month(`CRASH DATE`),
+        `CRASH YEAR` = year(`CRASH DATE`)
+    )
+```
+
+
+```{r}
 accident %>%
     select("CONTRIBUTING FACTOR VEHICLE 1") %>%
     group_by("CONTRIBUTING FACTOR VEHICLE 1") %>%
     distinct()
+
+accident %>%
+    select(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
+    filter(`CONTRIBUTING FACTOR VEHICLE 1` != "Unspecified") %>%
+    count(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
+    ggplot(aes(x = reorder(`CONTRIBUTING FACTOR VEHICLE 1`, -n), y = n)) +
+    geom_bar(stat = "identity") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+```{r}
+loc <- accident %>%
+    select(LOCATION) %>%
+    drop_na() %>%
+    filter(LOCATION != "(0.0, 0.0)")
+
+test <- loc %>%
+    mutate(
+        point = (LOCATION %>% str_sub(2, -2)
+            %>% str_trim() %>% str_split(","))
+    )
+
+test2 <- test %>%
+    mutate(
+        point = do.call(cbind, point)
+    ) %>%
+    mutate(
+        x = point[, 1],
+        y = point[, 2]
+    )
+```
+
+```{r}
+pairs(accident)
 ```

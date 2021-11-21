@@ -41,12 +41,10 @@ collisions_location <- accident %>%
 collisions_location
 ```
 
-```{r}
+```{r, include=F}
 ggplot(collisions_location, aes(x = LATITUDE, y = LONGITUDE))+
   geom_point(alpha = 0.01, size = 0.5, col = "darkgreen")+
   ggtitle("Location of NYC Traffic Collision")
-  
-
 ```
 
 ```{r}
@@ -56,6 +54,49 @@ accident_road<-accident%>%
 ```
 
 ```{r}
-
+accidents<-accident%>%
+  select(`CRASH DATE`, `CRASH TIME`, `ON STREET NAME`, `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, `NUMBER OF PEDESTRIANS INJURED`, `NUMBER OF MOTORIST INJURED`, `CONTRIBUTING FACTOR VEHICLE 1`,`VEHICLE TYPE CODE 1`)%>%
+  drop_na()%>%
+  mutate(`VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
+         `ON STREET NAME` = tolower(`ON STREET NAME`),
+         `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`,".*sedan.*", "sedan"),
+         `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`,".*bus.*", "bus"),
+         `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`,".*wagon.*", "wagon"),
+         `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`,".*truck.*", "truck"),
+         `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`,".*bicycle.*", "bike"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*cell phone.*", "electronic devices"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*electronic.*", "electronic devices"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*headphone.*", "electronic devices"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*navigation device.*", "electronic devices"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*texting.*", "electronic devices"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*fatigue.*", "fatigue"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*sleep.*", "fatigue"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*vihecle vendalism.*", "vihecle defection"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*windshield inadequate.*", "vihecle defection"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*tire failure/inadequate.*", "vihecle defection"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*tinted windows.*", "vihecle defection"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*headlights defective.*", "vihecle defection"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*brakes defective.*", "vihecle defection"),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*accelerator defective.*", "vihecle defection")
+         )%>%
+  filter(`VEHICLE TYPE CODE 1`%in% accident_vehicle$`VEHICLE TYPE CODE 1`)%>%
+  mutate(`CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")) %>%
+  filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified") %>% 
+  mutate(`CRASH HOUR` = hour(strptime(`CRASH TIME`, '%H:%M')))
 ```
+
+
+```{r}
+#trashcode
+contributing_factor1 <- accident %>% 
+  mutate(`CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
+         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")) %>%
+  group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>% 
+  summarise(count=n()) %>% 
+  filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified")
+
+contributing_factor1
+```
+
 

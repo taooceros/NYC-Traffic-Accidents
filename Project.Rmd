@@ -35,68 +35,96 @@ accident %>%
 collisions_location <- accident %>%
     mutate(year = year(`CRASH DATE`)) %>%
     select("LATITUDE", "LONGITUDE", "year") %>%
-      drop_na() %>%
+    drop_na() %>%
     filter(LATITUDE != 0 & LONGITUDE != 0) %>%
     filter(year %in% c(2019, 2020, 2021))
 collisions_location
 ```
 
 ```{r, include=F}
-ggplot(collisions_location, aes(x = LATITUDE, y = LONGITUDE))+
-  geom_point(alpha = 0.01, size = 0.5, col = "darkgreen")+
-  ggtitle("Location of NYC Traffic Collision")
+ggplot(collisions_location, aes(x = LATITUDE, y = LONGITUDE)) +
+    geom_point(alpha = 0.01, size = 0.5, col = "darkgreen") +
+    ggtitle("Location of NYC Traffic Collision")
 ```
 
 ```{r}
-accident_road<-accident%>%
-  group_by(	`ON STREET NAME`)%>%
-  summarise(count = n())
+accident_road <- accident %>%
+    group_by(`ON STREET NAME`) %>%
+    summarise(count = n())
 ```
 
 ```{r}
-accidents<-accident%>%
-  select(`CRASH DATE`, `CRASH TIME`, `ON STREET NAME`, `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, `NUMBER OF PEDESTRIANS INJURED`, `NUMBER OF MOTORIST INJURED`, `CONTRIBUTING FACTOR VEHICLE 1`,`VEHICLE TYPE CODE 1`)%>%
-  drop_na()%>%
-  mutate(`VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
-         `ON STREET NAME` = tolower(`ON STREET NAME`),
-         `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`,".*sedan.*", "sedan"),
-         `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`,".*bus.*", "bus"),
-         `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`,".*wagon.*", "wagon"),
-         `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`,".*truck.*", "truck"),
-         `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`,".*bicycle.*", "bike"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*cell phone.*", "electronic devices"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*electronic.*", "electronic devices"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*headphone.*", "electronic devices"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*navigation device.*", "electronic devices"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*texting.*", "electronic devices"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*fatigue.*", "fatigue"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*sleep.*", "fatigue"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*vihecle vendalism.*", "vihecle defection"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*windshield inadequate.*", "vihecle defection"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*tire failure/inadequate.*", "vihecle defection"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*tinted windows.*", "vihecle defection"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*headlights defective.*", "vihecle defection"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*brakes defective.*", "vihecle defection"),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`,".*accelerator defective.*", "vihecle defection")
-         )%>%
-  filter(`VEHICLE TYPE CODE 1`%in% accident_vehicle$`VEHICLE TYPE CODE 1`)%>%
-  mutate(`CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")) %>%
-  filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified") %>% 
-  mutate(`CRASH HOUR` = hour(strptime(`CRASH TIME`, '%H:%M')))
+accidents <- accident %>%
+    select(`CRASH DATE`, `CRASH TIME`, `ON STREET NAME`, `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, `NUMBER OF PEDESTRIANS INJURED`, `NUMBER OF MOTORIST INJURED`, `CONTRIBUTING FACTOR VEHICLE 1`, `VEHICLE TYPE CODE 1`) %>%
+    drop_na() %>%
+    mutate(
+        `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
+        `ON STREET NAME` = tolower(`ON STREET NAME`),
+        `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*sedan.*", "sedan"),
+        `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*bus.*", "bus"),
+        `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*wagon.*", "wagon"),
+        `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*truck.*", "truck"),
+        `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*bicycle.*", "bike"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*cell phone.*", "electronic devices"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*electronic.*", "electronic devices"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*headphone.*", "electronic devices"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*navigation device.*", "electronic devices"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*texting.*", "electronic devices"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*fatigue.*", "fatigue"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*sleep.*", "fatigue"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*vihecle vendalism.*", "vihecle defection"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*windshield inadequate.*", "vihecle defection"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*tire failure/inadequate.*", "vihecle defection"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*tinted windows.*", "vihecle defection"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*headlights defective.*", "vihecle defection"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*brakes defective.*", "vihecle defection"),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*accelerator defective.*", "vihecle defection")
+    ) %>%
+    filter(`VEHICLE TYPE CODE 1` %in% accident_vehicle$`VEHICLE TYPE CODE 1`) %>%
+    mutate(
+        `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")
+    ) %>%
+    filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified") %>%
+    mutate(`CRASH HOUR` = hour(strptime(`CRASH TIME`, "%H:%M")))
 ```
 
 
 ```{r}
-#trashcode
-contributing_factor1 <- accident %>% 
-  mutate(`CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
-         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")) %>%
-  group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>% 
-  summarise(count=n()) %>% 
-  filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified")
+# trashcode
+contributing_factor1 <- accident %>%
+    mutate(
+        `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
+        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")
+    ) %>%
+    group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
+    summarise(count = n()) %>%
+    filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified")
 
 contributing_factor1
 ```
 
 
+```{r Time Separation}
+
+accident <- accident %>%
+    mutate(
+        time_range = case_when(
+            hours(`CRASH TIME`) < 4 ~ "Late Night",
+            hours(`CRASH TIME`) < 8 ~ "Morning",
+            hours(`CRASH TIME`) < 12 ~ "Midday",
+            hours(`CRASH TIME`) < 16 ~ "Afternoon",
+            hours(`CRASH TIME`) < 20 ~ "Evening",
+            hours(`CRASH TIME`) < 24 ~ "Late Night"
+        )
+    )
+```
+
+```{r TimeRange Analysis}
+
+accident %>%
+    group_by(time_range, `CONTRIBUTING FACTOR 1`) %>%
+    summarise(count = n()) %>%
+    arrange(desc(count))
+
+```

@@ -224,12 +224,12 @@ contributing_factor1
 accident <- accident %>%
     mutate(
         time_range = case_when(
-            hours(`CRASH TIME`) < 4 ~ "Late Night",
-            hours(`CRASH TIME`) < 8 ~ "Morning",
-            hours(`CRASH TIME`) < 12 ~ "Midday",
-            hours(`CRASH TIME`) < 16 ~ "Afternoon",
-            hours(`CRASH TIME`) < 20 ~ "Evening",
-            hours(`CRASH TIME`) < 24 ~ "Late Night"
+            hour(`CRASH TIME`) < 4 ~ "Late Night",
+            hour(`CRASH TIME`) < 8 ~ "Morning",
+            hour(`CRASH TIME`) < 12 ~ "Midday",
+            hour(`CRASH TIME`) < 16 ~ "Afternoon",
+            hour(`CRASH TIME`) < 20 ~ "Evening",
+            hour(`CRASH TIME`) < 24 ~ "Late Night"
         )
     )
 ```
@@ -237,7 +237,7 @@ accident <- accident %>%
 ```{r TimeRange Analysis}
 
 accident %>%
-    group_by(time_range, `CONTRIBUTING FACTOR 1`) %>%
+    group_by(time_range, `CONTRIBUTING FACTOR VEHICLE 1`) %>%
     summarise(count = n()) %>%
     arrange(desc(count))
 ```

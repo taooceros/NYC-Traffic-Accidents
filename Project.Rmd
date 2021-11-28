@@ -99,7 +99,8 @@ accidents <- accident %>%
     drop_na() %>%
     mutate(
         `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
-        `ON STREET NAME` = tolower(`ON STREET NAME`)
+        `ON STREET NAME` = tolower(`ON STREET NAME`),
+        `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`)
     ) %>%
     mutate(
         `VEHICLE TYPE CODE 1` = case_when(
@@ -122,8 +123,8 @@ accidents <- accident %>%
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
                 regex = "(vihecle vendalism)|(windshield inadequate)|(tire failure/inadequate)|(tinted windows)|(headlights defective)|(brakes defective)|(accelerator defective)",
-            ) ~ "drug",
-            T ~ "other"
+            ) ~ "vihecle defection",
+            T ~ `CONTRIBUTING FACTOR VEHICLE 1`
         )
     )
 

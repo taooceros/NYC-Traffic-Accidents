@@ -4,12 +4,22 @@ library(lubridate)
 
 ```
 
-```{r}
+```{r, read_data, cache=TRUE}
 
 accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv")
+weather12_14 <- read_csv("noaa12_14.csv")
+weather15_17 <- read_csv("noaa15_17.csv")
+weather18_21 <- read_csv("noaa18_21.csv")
+weather12_21 <- weather12_14 %>%
+    add_row(weather15_17) %>%
+    add_row(weather18_21)
+
+weather12_21 <- weather12_21 %>%
+    select(LATITUDE, LONGITUDE, DATE, PRCP, SNOW, TMAX, TMIN) %>%
+    mutate(DATE = ymd(DATE))
 ```
 
-```{r}
+```{r, data_cleaning, cache=TRUE}
 accident <- accident %>%
     mutate(
         `CRASH DATE` = mdy(`CRASH DATE`)
@@ -26,16 +36,35 @@ accident %>%
         `CRASH MONTH` = month(`CRASH DATE`),
         `CRASH YEAR` = year(`CRASH DATE`)
     )
-```
-```{r}
-zipcode <- accident %>% 
-  select(`ZIP CODE`) %>% 
-  drop_na() %>% 
-  distinct()
 
-zipcode = as.vector(t(as.matrix(zipcode)))
-write.table(zipcode, "zipcode.txt", append = FALSE, sep = ",", dec = ".",
-            row.names = F, col.names = F)
+weather12_21 <- weather12_21 %>%
+    group_by(DATE) %>%
+    summarise(
+        PRCP = mean(PRCP, na.rm = T),
+        SNOW = mean(SNOW, na.rm = T),
+        TMAX = mean(TMAX, na.rm = T),
+        TMIN = mean(TMIN, na.rm = T)
+    )
+```
+
+```{r}
+accident_full <- accident %>%
+    rename(DATE = `CRASH DATE`) %>%
+    inner_join(weather12_21, by = "DATE")
+```
+
+
+```{r}
+zipcode <- accident %>%
+    select(`ZIP CODE`) %>%
+    drop_na() %>%
+    distinct()
+
+zipcode <- as.vector(t(as.matrix(zipcode)))
+write.table(zipcode, "zipcode.txt",
+    append = FALSE, sep = ",", dec = ".",
+    row.names = F, col.names = F
+)
 ```
 
 
@@ -135,5 +164,4 @@ accident %>%
     group_by(time_range, `CONTRIBUTING FACTOR 1`) %>%
     summarise(count = n()) %>%
     arrange(desc(count))
-
 ```

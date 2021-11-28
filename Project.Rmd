@@ -92,68 +92,101 @@ accident_road <- accident %>%
 ```
 
 ```{r}
+require(stringi)
+
 accidents <- accident %>%
     select(`CRASH DATE`, `CRASH TIME`, `ON STREET NAME`, `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, `NUMBER OF PEDESTRIANS INJURED`, `NUMBER OF MOTORIST INJURED`, `CONTRIBUTING FACTOR VEHICLE 1`, `VEHICLE TYPE CODE 1`) %>%
     drop_na() %>%
     mutate(
         `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
-        `ON STREET NAME` = tolower(`ON STREET NAME`),
-        `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*sedan.*", "sedan"),
-        `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*bus.*", "bus"),
-        `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*wagon.*", "wagon"),
-        `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*truck.*", "truck"),
-        `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*bicycle.*", "bike"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*cell phone.*", "electronic devices"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*electronic.*", "electronic devices"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*headphone.*", "electronic devices"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*navigation device.*", "electronic devices"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*texting.*", "electronic devices"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*fatigue.*", "fatigue"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*sleep.*", "fatigue"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*vihecle vendalism.*", "vihecle defection"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*windshield inadequate.*", "vihecle defection"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*tire failure/inadequate.*", "vihecle defection"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*tinted windows.*", "vihecle defection"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*headlights defective.*", "vihecle defection"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*brakes defective.*", "vihecle defection"),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*accelerator defective.*", "vihecle defection")
+        `ON STREET NAME` = tolower(`ON STREET NAME`)
     ) %>%
-    filter(`VEHICLE TYPE CODE 1` %in% accident$`VEHICLE TYPE CODE 1`) %>%
     mutate(
-        `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")
-    ) %>%
-    filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified") %>%
-    mutate(`CRASH HOUR` = hour(strptime(`CRASH TIME`, "%H:%M")))
+        `VEHICLE TYPE CODE 1` = case_when(
+            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "sedan") ~ "sadan",
+            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "bus") ~ "bus",
+            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "wagon") ~ "wagon",
+            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "truck") ~ "truck",
+            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "bicycle") ~ "bicycle",
+            T ~ "other"
+        ),
+        `CONTRIBUTING FACTOR VEHICLE 1` = case_when(
+            stri_detect(
+                `CONTRIBUTING FACTOR VEHICLE 1`,
+                regex = "(cell phone)|(electronic)|(headphone)|(navigation device)|(texting)"
+            ) ~ "electronic",
+            stri_detect(
+                `CONTRIBUTING FACTOR VEHICLE 1`,
+                regex = "(fatigue)|(sleep)"
+            ) ~ "fatigue",
+            stri_detect(
+                `CONTRIBUTING FACTOR VEHICLE 1`,
+                regex = "(vihecle vendalism)|(windshield inadequate)|(tire failure/inadequate)|(tinted windows)|(headlights defective)|(brakes defective)|(accelerator defective)",
+            ) ~ "drug",
+            T ~ "other"
+        )
+    )
+
+
+# mutate(
+#     `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
+#     `ON STREET NAME` = tolower(`ON STREET NAME`),
+#     `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*sedan.*", "sedan"),
+#     `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*bus.*", "bus"),
+#     `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*wagon.*", "wagon"),
+#     `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*truck.*", "truck"),
+#     `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*bicycle.*", "bike"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*cell phone.*", "electronic devices"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*electronic.*", "electronic devices"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*headphone.*", "electronic devices"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*navigation device.*", "electronic devices"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*texting.*", "electronic devices"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*fatigue.*", "fatigue"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*sleep.*", "fatigue"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*vihecle vendalism.*", "vihecle defection"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*windshield inadequate.*", "vihecle defection"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*tire failure/inadequate.*", "vihecle defection"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*tinted windows.*", "vihecle defection"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*headlights defective.*", "vihecle defection"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*brakes defective.*", "vihecle defection"),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*accelerator defective.*", "vihecle defection")
+# ) %>%
+# filter(`VEHICLE TYPE CODE 1` %in% accident$`VEHICLE TYPE CODE 1`) %>%
+# mutate(
+#     `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
+#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")
+# ) %>%
+# filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified") %>%
+# mutate(`CRASH HOUR` = hour(strptime(`CRASH TIME`, "%H:%M")))
 ```
 
 ```{r}
 public.transportation <- read_csv("publicTrans.csv")
 structure(public.transportation)
 public.transportation <- public.transportation %>%
-  mutate(
-    `CRASH DATE` = mdy(Date),
-    subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
-    bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
-    lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
-    metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
-    total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
-  ) %>%
-  filter(
-    `CRASH DATE` >= as.Date("2021-01-01")
-  ) %>%
-  select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
+    mutate(
+        `CRASH DATE` = mdy(Date),
+        subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
+        bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
+        lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
+        metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
+        total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
+    ) %>%
+    filter(
+        `CRASH DATE` >= as.Date("2021-01-01")
+    ) %>%
+    select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
 
 # filter out 2021 statistics from `accidents`
 accident.2021 <- accident %>% # you can change accident into newly modified data frame
-  filter(
-    `CRASH DATE` >= as.Date("2021-01-01")
-  )
+    filter(
+        `CRASH DATE` >= as.Date("2021-01-01")
+    )
 
 # merge data
 accident.2021 <- accident.2021 %>%
-  left_join(public.transportation, by = "CRASH DATE" ) %>%
-  select(`CRASH DATE`, total.public.ridership, everything())
+    left_join(public.transportation, by = "CRASH DATE") %>%
+    select(`CRASH DATE`, total.public.ridership, everything())
 ```
 
 
@@ -162,12 +195,12 @@ traffic_vol1 <- read_csv("Traffic_Volume12_13.csv")
 traffic_vol2 <- read_csv("Traffic_Volume14_19.csv")
 traffic_vol_full <- rbind(traffic_vol1, traffic_vol2)
 
-traffic<-traffic_vol_full%>%
-  mutate(Date = mdy(Date)) %>% 
-  arrange(Date) %>% 
-  select(!c(Direction, `Segment ID`, `ID`, `From`, `To`))%>%
-  group_by(Date,`Roadway Name`)%>%
-  summarise(across(.fns=c(sum)))#sum?average?
+traffic <- traffic_vol_full %>%
+    mutate(Date = mdy(Date)) %>%
+    arrange(Date) %>%
+    select(!c(Direction, `Segment ID`, `ID`, `From`, `To`)) %>%
+    group_by(Date, `Roadway Name`) %>%
+    summarise(across(.fns = c(sum))) # sum?average?
 ```
 
 

@@ -27,7 +27,16 @@ accident %>%
         `CRASH YEAR` = year(`CRASH DATE`)
     )
 ```
+```{r}
+zipcode <- accident %>% 
+  select(`ZIP CODE`) %>% 
+  drop_na() %>% 
+  distinct()
 
+zipcode = as.vector(t(as.matrix(zipcode)))
+write.table(zipcode, "zipcode.txt", append = FALSE, sep = ",", dec = ".",
+            row.names = F, col.names = F)
+```
 
 
 

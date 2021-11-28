@@ -118,13 +118,56 @@ accidents <- accident %>%
         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*brakes defective.*", "vihecle defection"),
         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*accelerator defective.*", "vihecle defection")
     ) %>%
-    filter(`VEHICLE TYPE CODE 1` %in% accident_vehicle$`VEHICLE TYPE CODE 1`) %>%
+    filter(`VEHICLE TYPE CODE 1` %in% accident$`VEHICLE TYPE CODE 1`) %>%
     mutate(
         `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
         `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")
     ) %>%
     filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified") %>%
     mutate(`CRASH HOUR` = hour(strptime(`CRASH TIME`, "%H:%M")))
+```
+
+```{r}
+public.transportation <- read_csv("publicTrans.csv")
+structure(public.transportation)
+public.transportation <- public.transportation %>%
+  mutate(
+    `CRASH DATE` = mdy(Date),
+    subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
+    bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
+    lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
+    metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
+    total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
+  ) %>%
+  filter(
+    `CRASH DATE` >= as.Date("2021-01-01")
+  ) %>%
+  select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
+
+# filter out 2021 statistics from `accidents`
+accident.2021 <- accident %>% # you can change accident into newly modified data frame
+  filter(
+    `CRASH DATE` >= as.Date("2021-01-01")
+  )
+
+# merge data
+accident.2021 <- accident.2021 %>%
+  left_join(public.transportation, by = "CRASH DATE" ) %>%
+  select(`CRASH DATE`, total.public.ridership, everything())
+```
+
+
+```{r}
+traffic_vol1 <- read_csv("Traffic_Volume12_13.csv")
+traffic_vol2 <- read_csv("Traffic_Volume14_19.csv")
+traffic_vol_full <- rbind(traffic_vol1, traffic_vol2)
+
+traffic<-traffic_vol_full%>%
+  mutate(Date = mdy(Date)) %>% 
+  arrange(Date) %>% 
+  select(!c(Direction, `Segment ID`, `ID`, `From`, `To`))%>%
+  group_by(Date,`Roadway Name`)%>%
+  summarise(across(.fns=c(sum)))#sum?average?
 ```
 
 

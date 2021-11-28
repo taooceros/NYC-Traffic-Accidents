@@ -27,7 +27,16 @@ accident %>%
         `CRASH YEAR` = year(`CRASH DATE`)
     )
 ```
+```{r}
+zipcode <- accident %>% 
+  select(`ZIP CODE`) %>% 
+  drop_na() %>% 
+  distinct()
 
+zipcode = as.vector(t(as.matrix(zipcode)))
+write.table(zipcode, "zipcode.txt", append = FALSE, sep = ",", dec = ".",
+            row.names = F, col.names = F)
+```
 
 
 
@@ -41,7 +50,7 @@ collisions_location <- accident %>%
 collisions_location
 ```
 
-```{r, include=F}
+```{r}
 ggplot(collisions_location, aes(x = LATITUDE, y = LONGITUDE))+
   geom_point(alpha = 0.01, size = 0.5, col = "darkgreen")+
   ggtitle("Location of NYC Traffic Collision")
@@ -84,6 +93,11 @@ accidents<-accident%>%
          `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")) %>%
   filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified") %>% 
   mutate(`CRASH HOUR` = hour(strptime(`CRASH TIME`, '%H:%M')))
+```
+
+
+```{r}
+accidents
 ```
 
 

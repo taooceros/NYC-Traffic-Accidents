@@ -99,8 +99,7 @@ accidents <- accident %>%
     drop_na() %>%
     mutate(
         `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
-        `ON STREET NAME` = tolower(`ON STREET NAME`),
-        `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`)
+        `ON STREET NAME` = tolower(`ON STREET NAME`)
     ) %>%
     mutate(
         `VEHICLE TYPE CODE 1` = case_when(
@@ -123,8 +122,8 @@ accidents <- accident %>%
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
                 regex = "(vihecle vendalism)|(windshield inadequate)|(tire failure/inadequate)|(tinted windows)|(headlights defective)|(brakes defective)|(accelerator defective)",
-            ) ~ "vihecle defection",
-            T ~ `CONTRIBUTING FACTOR VEHICLE 1`
+            ) ~ "drug",
+            T ~ "other"
         )
     ) %>% 
   arrange(`CRASH DATE`)
@@ -207,13 +206,19 @@ traffic <- traffic_vol_full %>%
 ```
 
 ```{r}
+# rename ave to avenue, st/sreet to street
 accident_12_19 <- accidents %>% 
   filter(`CRASH DATE` >= as.Date("2012-09-28") & `CRASH DATE` <= as.Date("2019-11-24")) %>% 
-  rename(Date = `CRASH DATE`, `STREET NAME` = `ON STREET NAME`) 
+  rename(Date = `CRASH DATE`, `STREET NAME` = `ON STREET NAME`) %>% 
+  mutate(`STREET NAME` = stri_replace(`STREET NAME`, regex="ave$", "avenue"),
+         `STREET NAME` = stri_replace(`STREET NAME`, regex=".*st$", "street"), 
+         `STREET NAME` = stri_replace(`STREET NAME`, regex=".*sreet$", "street")) 
 
 traffic <- traffic %>% 
   mutate(`STREET NAME` = tolower(`STREET NAME`)) %>%
-  mutate(`STREET NAME` = stri_replace(`STREET NAME`, regex="ave$", "avenue")) %>% 
+  mutate(`STREET NAME` = stri_replace(`STREET NAME`, regex="ave$", "avenue"), 
+         `STREET NAME` = stri_replace(`STREET NAME`, regex=".*st$", "street"), 
+         `STREET NAME` = stri_replace(`STREET NAME`, regex=".*sreet$", "street")) %>% 
   group_by(Date,`STREET NAME`)%>%
   summarise(across(.fns=c(sum)))
 
@@ -221,10 +226,29 @@ traffic_cnt <- traffic %>%
   group_by(`STREET NAME`) %>% 
   summarise(cnt = n())
 
-accident_w_flow <- accident_12_19 %>% 
-  full_join(traffic, by=c("Date", "STREET NAME"))
+accident_12_19_cnt <- accident_12_19 %>% 
+  group_by(`STREET NAME`) %>% 
+  summarise(cnt_acc = n())
 
-traffic_cnt
+accident_w_flow <- accident_12_19 %>% 
+  right_join(traffic, by=c("Date", "STREET NAME"))
+
+df_cnt <- accident_12_19_cnt %>% 
+  full_join(traffic_cnt, by="STREET NAME")
+
+accident_w_flow <- accident_w_flow %>% 
+  mutate(indicator = case_when(
+    (`NUMBER OF PERSONS INJURED` == 0) & (`NUMBER OF PERSONS KILLED` == 0) ~ 0,
+    TRUE ~ 1
+  )) %>% 
+  select(indicator, everything())
+
+accident_w_flow_cnt <- accident_w_flow %>% 
+  count(indicator)
+
+
+accident_w_flow
+accident_w_flow_cnt
 ```
 
 

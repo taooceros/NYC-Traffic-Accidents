@@ -60,11 +60,11 @@ zipcode <- accident %>%
     drop_na() %>%
     distinct()
 
-zipcode <- as.vector(t(as.matrix(zipcode)))
-write.table(zipcode, "zipcode.txt",
-    append = FALSE, sep = ",", dec = ".",
-    row.names = F, col.names = F
-)
+# zipcode <- as.vector(t(as.matrix(zipcode)))
+# write.table(zipcode, "zipcode.txt",
+#     append = FALSE, sep = ",", dec = ".",
+#     row.names = F, col.names = F
+# )
 ```
 
 
@@ -125,9 +125,15 @@ accidents <- accident %>%
             ) ~ "drug",
             T ~ "other"
         )
-    ) %>% 
-  arrange(`CRASH DATE`)
+    ) %>%
+    arrange(`CRASH DATE`)
 
+
+accidents %>%
+    group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
+    summarise(
+        death = mean(`NUMBER OF PERSONS KILLED`)
+            )
 
 # mutate(
 #     `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
@@ -201,56 +207,29 @@ traffic <- traffic_vol_full %>%
     arrange(Date) %>%
     select(!c(Direction, `Segment ID`, `ID`, `From`, `To`)) %>%
     group_by(Date, `Roadway Name`) %>%
-    summarise(across(.fns = c(sum))) %>% 
+    summarise(across(.fns = c(sum))) %>%
     rename(`STREET NAME` = `Roadway Name`)
 ```
 
 ```{r}
-# rename ave to avenue, st/sreet to street
-accident_12_19 <- accidents %>% 
-  filter(`CRASH DATE` >= as.Date("2012-09-28") & `CRASH DATE` <= as.Date("2019-11-24")) %>% 
-  rename(Date = `CRASH DATE`, `STREET NAME` = `ON STREET NAME`) %>% 
-  mutate(`STREET NAME` = stri_replace(`STREET NAME`, regex="ave$", "avenue"),
-         `STREET NAME` = stri_replace(`STREET NAME`, regex=".*st$", "street"), 
-         `STREET NAME` = stri_replace(`STREET NAME`, regex=".*sreet$", "street")) 
+accident_12_19 <- accidents %>%
+    filter(`CRASH DATE` >= as.Date("2012-09-28") & `CRASH DATE` <= as.Date("2019-11-24")) %>%
+    rename(Date = `CRASH DATE`, `STREET NAME` = `ON STREET NAME`)
 
-traffic <- traffic %>% 
-  mutate(`STREET NAME` = tolower(`STREET NAME`)) %>%
-  mutate(`STREET NAME` = stri_replace(`STREET NAME`, regex="ave$", "avenue"), 
-         `STREET NAME` = stri_replace(`STREET NAME`, regex=".*st$", "street"), 
-         `STREET NAME` = stri_replace(`STREET NAME`, regex=".*sreet$", "street")) %>% 
-  group_by(Date,`STREET NAME`)%>%
-  summarise(across(.fns=c(sum)))
+traffic <- traffic %>%
+    mutate(`STREET NAME` = tolower(`STREET NAME`)) %>%
+    mutate(`STREET NAME` = stri_replace(`STREET NAME`, regex = "ave$", "avenue")) %>%
+    group_by(Date, `STREET NAME`) %>%
+    summarise(across(.fns = c(sum)))
 
-traffic_cnt <- traffic %>% 
-  group_by(`STREET NAME`) %>% 
-  summarise(cnt = n())
+traffic_cnt <- traffic %>%
+    group_by(`STREET NAME`) %>%
+    summarise(cnt = n())
 
-# accident_12_19_cnt <- accident_12_19 %>% 
-#   group_by(`STREET NAME`) %>% 
-#   summarise(cnt_acc = n())
-
-accident_w_flow <- accident_12_19 %>% 
-  right_join(traffic, by=c("Date", "STREET NAME"))
-
-df_cnt <- accident_12_19_cnt %>% 
-  full_join(traffic_cnt, by="STREET NAME")
-
-accident_w_flow <- accident_w_flow %>% 
-  mutate(indicator = case_when(
-    (`NUMBER OF PERSONS INJURED` == 0) & (`NUMBER OF PERSONS KILLED` == 0) ~ 0,
-    TRUE ~ 1
-  )) %>% 
-  select(indicator, everything())
-
-# accident_w_flow_cnt <- accident_w_flow %>% 
-#   count(indicator)
+accident_w_flow <- accident_12_19 %>%
+    full_join(traffic, by = c("Date", "STREET NAME"))
 
 
-accident_final<-accident_w_flow%>%
-  mutate(hour = hour(`CRASH TIME`),
-         flow = case_when(hour >= 0 & hour < 1 ~ `12:00-1:00 AM_1_1`,
-                          hour >= 15 & hour < 16 ~ `3:00-4:00PM_1_1`))
 
 ```
 
@@ -259,29 +238,29 @@ accident_final<-accident_w_flow%>%
 public.transportation <- read_csv("publicTrans.csv")
 structure(public.transportation)
 public.transportation <- public.transportation %>%
-  mutate(
-    `CRASH DATE` = mdy(Date),
-    subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
-    bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
-    lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
-    metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
-    total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
-  ) %>%
-  filter(
-    `CRASH DATE` >= as.Date("2021-01-01")
-  ) %>%
-  select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
+    mutate(
+        `CRASH DATE` = mdy(Date),
+        subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
+        bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
+        lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
+        metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
+        total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
+    ) %>%
+    filter(
+        `CRASH DATE` >= as.Date("2021-01-01")
+    ) %>%
+    select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
 
 # filter out 2021 statistics from `accidents`
 accident.2021 <- accident %>% # you can change accident into newly modified data frame
-  filter(
-    `CRASH DATE` >= as.Date("2021-01-01")
-  )
+    filter(
+        `CRASH DATE` >= as.Date("2021-01-01")
+    )
 
 # merge data
 accident.2021 <- accident.2021 %>%
-  left_join(public.transportation, by = "CRASH DATE" ) %>%
-  select(`CRASH DATE`, total.public.ridership, everything())
+    left_join(public.transportation, by = "CRASH DATE") %>%
+    select(`CRASH DATE`, total.public.ridership, everything())
 ```
 
 

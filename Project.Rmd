@@ -226,9 +226,9 @@ traffic_cnt <- traffic %>%
   group_by(`STREET NAME`) %>% 
   summarise(cnt = n())
 
-accident_12_19_cnt <- accident_12_19 %>% 
-  group_by(`STREET NAME`) %>% 
-  summarise(cnt_acc = n())
+# accident_12_19_cnt <- accident_12_19 %>% 
+#   group_by(`STREET NAME`) %>% 
+#   summarise(cnt_acc = n())
 
 accident_w_flow <- accident_12_19 %>% 
   right_join(traffic, by=c("Date", "STREET NAME"))
@@ -243,12 +243,15 @@ accident_w_flow <- accident_w_flow %>%
   )) %>% 
   select(indicator, everything())
 
-accident_w_flow_cnt <- accident_w_flow %>% 
-  count(indicator)
+# accident_w_flow_cnt <- accident_w_flow %>% 
+#   count(indicator)
 
 
-accident_w_flow
-accident_w_flow_cnt
+accident_final<-accident_w_flow%>%
+  mutate(hour = hour(`CRASH TIME`),
+         flow = case_when(hour >= 0 & hour < 1 ~ `12:00-1:00 AM_1_1`,
+                          hour >= 15 & hour < 16 ~ `3:00-4:00PM_1_1`))
+
 ```
 
 

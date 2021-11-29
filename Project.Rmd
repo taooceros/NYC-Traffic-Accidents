@@ -133,7 +133,7 @@ accidents %>%
     group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
     summarise(
         death = mean(`NUMBER OF PERSONS KILLED`)
-            )
+    )
 
 # mutate(
 #     `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
@@ -229,8 +229,39 @@ traffic_cnt <- traffic %>%
 accident_w_flow <- accident_12_19 %>%
     full_join(traffic, by = c("Date", "STREET NAME"))
 
-
-
+accident_final <- accident_w_flow %>%
+    mutate(
+        hour = hour(`CRASH TIME`)
+    ) %>%
+    mutate(
+        flow = case_when(
+            hour < 1 ~ `12:00-1:00 AM_1_1`,
+            hour < 2 ~ `1:00-2:00AM_1_1`,
+            hour < 3 ~ `2:00-3:00AM_1_1`,
+            hour < 4 ~ `3:00-4:00AM_1_1`,
+            hour < 5 ~ `4:00-5:00AM_1_1`,
+            hour < 6 ~ `5:00-6:00AM_1_1`,
+            hour < 7 ~ `6:00-7:00AM_1_1`,
+            hour < 8 ~ `7:00-8:00AM_1_1`,
+            hour < 9 ~ `8:00-9:00AM_1_1`,
+            hour < 10 ~ `9:00-10:00AM_1_1`,
+            hour < 11 ~ `10:00-11:00AM_1_1`,
+            hour < 12 ~ `11:00-12:00PM_1_1`,
+            hour < 13 ~ `12:00-1:00PM_1_1`,
+            hour < 14 ~ `1:00-2:00PM_1_1`,
+            hour < 15 ~ `2:00-3:00PM_1_1`,
+            hour < 16 ~ `3:00-4:00PM_1_1`,
+            hour < 17 ~ `4:00-5:00PM_1_1`,
+            hour < 18 ~ `5:00-6:00PM_1_1`,
+            hour < 19 ~ `6:00-7:00PM_1_1`,
+            hour < 20 ~ `7:00-8:00PM_1_1`,
+            hour < 21 ~ `8:00-9:00PM_1_1`,
+            hour < 22 ~ `9:00-10:00PM_1_1`,
+            hour < 23 ~ `10:00-11:00PM_1_1`,
+            hour < 24 ~ `11:00-12:00AM_1_1`,
+            T ~ -1
+        )
+    )
 ```
 
 

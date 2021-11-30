@@ -26,6 +26,22 @@ weather<-weather12_21%>%
     replace(is.na(.), 0)
 ```
 
+```{r test accuracy}
+data <- mtcars;
+
+trainingAndTesting <- function(dataFrame, ratio) {
+  dt = sample(nrow(data), nrow(data) * ratio);
+  train <- data[dt,];
+  test <- data[-dt,];
+  result <-list(train, test);
+  return(result)
+}
+
+combined_set <- trainingAndTesting(data, ratio = 0.7)
+train <- combined_set[[1]];
+test <- combined_set[[2]];
+```
+
 ```{r, data_cleaning, cache=TRUE}
 accident <- accident %>%
     mutate(
@@ -88,16 +104,19 @@ accident_road <- accident %>%
 ```{r}
 require(stringi)
 
+require(stringi)
+
 accidents <- accident %>%
     select(`CRASH DATE`, `CRASH TIME`, `ON STREET NAME`, `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, `NUMBER OF PEDESTRIANS INJURED`, `NUMBER OF MOTORIST INJURED`, `CONTRIBUTING FACTOR VEHICLE 1`, `VEHICLE TYPE CODE 1`) %>%
     drop_na() %>%
     mutate(
         `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
-        `ON STREET NAME` = tolower(`ON STREET NAME`)
+        `ON STREET NAME` = tolower(`ON STREET NAME`),
+        `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`)
     ) %>%
     mutate(
         `VEHICLE TYPE CODE 1` = case_when(
-            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "sedan") ~ "sedan",
+            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "sedan") ~ "sadan",
             stri_detect(`VEHICLE TYPE CODE 1`, fixed = "bus") ~ "bus",
             stri_detect(`VEHICLE TYPE CODE 1`, fixed = "wagon") ~ "wagon",
             stri_detect(`VEHICLE TYPE CODE 1`, fixed = "truck") ~ "truck",
@@ -105,22 +124,47 @@ accidents <- accident %>%
             T ~ "other"
         ),
         `CONTRIBUTING FACTOR VEHICLE 1` = case_when(
+            stri_detect(`CONTRIBUTING FACTOR VEHICLE 1`, regex = "(fatigued/drowsy)|(fell asleep)") ~ "Fatigue",
+            stri_detect(`CONTRIBUTING FACTOR VEHICLE 1`, regex = "collision with pedestrian") ~ "Pedestrian",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(cell phone)|(electronic)|(headphone)|(navigation device)|(texting)"
-            ) ~ "electronic",
+                regex = "(accelerator defective)|(brakes defective)|(oversized vehicle)|(steering failure)|(tow hitch defective)|(other lighting defects)|(headlights defective)|(tinted windows)|(tire failure/inadequate)|(windshield inadequate)"
+            ) ~ "Vehicle Defection",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(fatigue)|(sleep)"
-            ) ~ "fatigue",
+                regex = "(alchohol involvement)|(drugs (illegal))"
+            ) ~ "Drug & Alcohol",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(vihecle vendalism)|(windshield inadequate)|(tire failure/inadequate)|(tinted windows)|(headlights defective)|(brakes defective)|(accelerator defective)",
-            ) ~ "drug",
+                regex = "(failure to yield right of way)|(passing or lane usage improper)|(turning improperly)|(unsafe lane changing)|(traffic control disregarded)|(unsafe speed)|(aggressive driving)|(failure to keep right)|(aggressive driving/road rage)"
+            ) ~ "Disobey traffic rule",
+            stri_detect(
+                `CONTRIBUTING FACTOR VEHICLE 1`,
+                regex = "(driver inattention/distraction)|(following too closely)|(backing unsafely)|(passing too closely)|(outside car distraction)|(passneger distraction)|(eating or drinking)|(listening/using headphones)|(using on board navigation device)"
+            ) ~ "Driver distraction",
+            stri_detect(
+                `CONTRIBUTING FACTOR VEHICLE 1`,
+                regex = "(other vehicular)|(pavement slippery)|(reaction to uninvolved vehicle)|(pedestrian/bicyclist)|(glare)|(obstruction/debris)|(pavement defective)|(reaction to other uninvolved vehicle)|(animals action)|(lane marking improper)|(traffic control device improper)|(driverless/runaway vehicle)"
+            ) ~ "Environmental (road, light, pedestrian)",
+            stri_detect(
+                `CONTRIBUTING FACTOR VEHICLE 1`,
+                regex = "(lost consciousness)|(physical disability)|(illness)|(illnes)|(shoulder defective)",
+            ) ~ "Driver Health Problem",
+            stri_detect(
+                `CONTRIBUTING FACTOR VEHICLE 1`,
+                regex = "(prescription medication)|(driver inexperience)|(view obstructed)",
+            ) ~ "force majeure of driver",
             T ~ "other"
         )
-    ) %>% 
-  arrange(`CRASH DATE`)
+    ) %>%
+    arrange(`CRASH DATE`)
+
+
+accidents %>%
+    group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
+    summarise(
+        death = mean(`NUMBER OF PERSONS KILLED`)
+    )
 
 
 # mutate(

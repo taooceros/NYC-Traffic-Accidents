@@ -18,12 +18,34 @@ weather12_21 <- weather12_14 %>%
 #     select(-c(ELEVATION, WSF5, WSF2, WESF, WESD, WDF5, WDF2, TSUN, TOBS, SNWD, PSUN, PGTM, MDSF, MDPR, DASF, DAPR, AWND)) %>%
 #     mutate(DATE = ymd(DATE))
 
-weather<-weather12_21%>%
+weather <- weather12_21 %>%
     select(!c(STATION, NAME, LATITUDE, LONGITUDE, ELEVATION)) %>% 
     arrange(DATE) %>% 
     group_by(DATE)%>%
     summarise(across(AWND:WT22, ~ mean(.x, na.rm = TRUE))) %>% 
-    replace(is.na(.), 0)
+    replace(is.na(.), 0) %>%
+    rename(
+      Foggy = WT01,
+      Heavy.Fog = WT02,
+      Ice.Fog = WT22,
+      Ground.Fog = WT21,
+      Mist = WT13,
+      Thunder = WT03,
+      Small.Hail = WT04,
+      Hail = WT05,
+      Rime = WT06,
+      Dust = WT07,
+      Smoke = WT08,
+      Blowing.Spray = WT12,
+      Blowing.Snow = WT09,
+      Snow = WT18,
+      Tornado = WT10,
+      Damaging.Wind = WT11,
+      Drizzle = WT14,
+      Freezing.Drizzle = WT15,
+      Rain = WT16,
+      Unknown.Precipitation = WT19
+    )
 ```
 
 ```{r test accuracy}

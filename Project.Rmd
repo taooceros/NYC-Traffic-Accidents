@@ -40,6 +40,23 @@ trainingAndTesting <- function(dataFrame, ratio) {
 combined_set <- trainingAndTesting(data, ratio = 0.7)
 train <- combined_set[[1]];
 test <- combined_set[[2]];
+
+testAccuracy <- function(fit.model, train, test, var.index) {
+  num <- nrow(test);
+  
+  errors <- rep(NA, num);
+  prediction <- predict(fit.model, newdata = test[var.index]);
+  
+  for (i in 1:num) {
+    errors[i] <- (prediction[i] - test$wt[i])^2 ;
+  }
+  
+  return(mean(errors))
+}
+
+fit <- lm(data$wt ~ data$vs)
+f <- testAccuracy(fit, train, test, 8)
+f
 ```
 
 ```{r, data_cleaning, cache=TRUE}

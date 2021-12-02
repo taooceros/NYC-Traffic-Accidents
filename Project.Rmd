@@ -19,61 +19,57 @@ weather12_21 <- weather12_14 %>%
 #     mutate(DATE = ymd(DATE))
 
 weather <- weather12_21 %>%
-    select(!c(STATION, NAME, LATITUDE, LONGITUDE, ELEVATION)) %>% 
-    arrange(DATE) %>% 
-    group_by(DATE)%>%
-    summarise(across(AWND:WT22, ~ mean(.x, na.rm = TRUE))) %>% 
+    select(!c(STATION, NAME, LATITUDE, LONGITUDE, ELEVATION)) %>%
+    arrange(DATE) %>%
+    group_by(DATE) %>%
+    summarise(across(AWND:WT22, ~ mean(.x, na.rm = TRUE))) %>%
     replace(is.na(.), 0) %>%
     rename(
-      Foggy = WT01,
-      Heavy.Fog = WT02,
-      Ice.Fog = WT22,
-      Ground.Fog = WT21,
-      Mist = WT13,
-      Thunder = WT03,
-      Small.Hail = WT04,
-      Hail = WT05,
-      Rime = WT06,
-      Dust = WT07,
-      Smoke = WT08,
-      Blowing.Spray = WT12,
-      Blowing.Snow = WT09,
-      Snow = WT18,
-      Tornado = WT10,
-      Damaging.Wind = WT11,
-      Drizzle = WT14,
-      Freezing.Drizzle = WT15,
-      Rain = WT16,
-      Unknown.Precipitation = WT19
+        Foggy = WT01,
+        Heavy.Fog = WT02,
+        Ice.Fog = WT22,
+        Ground.Fog = WT21,
+        Mist = WT13,
+        Thunder = WT03,
+        Small.Hail = WT04,
+        Hail = WT05,
+        Rime = WT06,
+        Smoke = WT08,
+        Blowing.Snow = WT09,
+        Snow = WT18,
+        Tornado = WT10,
+        Damaging.Wind = WT11,
+        Drizzle = WT14,
+        Freezing.Drizzle = WT15,
+        Rain = WT16,
+        Unknown.Precipitation = WT19
     )
 ```
 
 ```{r test accuracy}
-data <- mtcars;
-
+data <- mtcars
 trainingAndTesting <- function(dataFrame, ratio) {
-  dt = sample(nrow(data), nrow(data) * ratio);
-  train <- data[dt,];
-  test <- data[-dt,];
-  result <-list(train, test);
-  return(result)
+    dt <- sample(nrow(data), nrow(data) * ratio)
+    train <- data[dt, ]
+    test <- data[-dt, ]
+    result <- list(train, test)
+    return(result)
 }
 
 combined_set <- trainingAndTesting(data, ratio = 0.7)
-train <- combined_set[[1]];
-test <- combined_set[[2]];
-
+train <- combined_set[[1]]
+test <- combined_set[[2]]
 testAccuracy <- function(fit.model, train, test, var.index) {
-  num <- nrow(test);
-  
-  errors <- rep(NA, num);
-  prediction <- predict(fit.model, newdata = test[var.index]);
-  
-  for (i in 1:num) {
-    errors[i] <- (prediction[i] - test$wt[i])^2 ;
-  }
-  
-  return(mean(errors))
+    num <- nrow(test)
+
+    errors <- rep(NA, num)
+    prediction <- predict(fit.model, newdata = test[var.index])
+
+    for (i in 1:num) {
+        errors[i] <- (prediction[i] - test$wt[i])^2
+    }
+
+    return(mean(errors))
 }
 
 fit <- lm(data$wt ~ data$vs)
@@ -110,12 +106,7 @@ accident %>%
 ```
 
 ```{r}
-accident_full <- accident %>%
-    rename(DATE = `CRASH DATE`) %>%
-    inner_join(weather, by = "DATE") %>% 
-    arrange(DATE)
 
-accident_full
 ```
 
 ```{r}
@@ -128,11 +119,11 @@ collisions_location <- accident %>%
 collisions_location
 ```
 
-```{r, include=F}
-ggplot(collisions_location, aes(x = LATITUDE, y = LONGITUDE)) +
-    geom_point(alpha = 0.01, size = 0.5, col = "darkgreen") +
-    ggtitle("Location of NYC Traffic Collision")
-```
+# ```{r, include=F}
+# ggplot(collisions_location, aes(x = LATITUDE, y = LONGITUDE)) +
+#     geom_point(alpha = 0.01, size = 0.5, col = "darkgreen") +
+#     ggtitle("Location of NYC Traffic Collision")
+# ```
 
 ```{r}
 accident_road <- accident %>%
@@ -140,8 +131,23 @@ accident_road <- accident %>%
     summarise(count = n())
 ```
 
+
+```{r Time Separation}
+
+accident <- accident %>%
+    mutate(
+        time_range = case_when(
+            hours(`CRASH TIME`) < 4 ~ "Late Night",
+            hours(`CRASH TIME`) < 8 ~ "Morning",
+            hours(`CRASH TIME`) < 12 ~ "Midday",
+            hours(`CRASH TIME`) < 16 ~ "Afternoon",
+            hours(`CRASH TIME`) < 20 ~ "Evening",
+            hours(`CRASH TIME`) < 24 ~ "Late Night"
+        )
+    )
+```
+
 ```{r}
-require(stringi)
 
 require(stringi)
 
@@ -204,113 +210,81 @@ accidents %>%
     summarise(
         death = mean(`NUMBER OF PERSONS KILLED`)
     )
-
-
-# mutate(
-#     `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
-#     `ON STREET NAME` = tolower(`ON STREET NAME`),
-#     `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*sedan.*", "sedan"),
-#     `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*bus.*", "bus"),
-#     `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*wagon.*", "wagon"),
-#     `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*truck.*", "truck"),
-#     `VEHICLE TYPE CODE 1` = str_replace_all(`VEHICLE TYPE CODE 1`, ".*bicycle.*", "bike"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*cell phone.*", "electronic devices"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*electronic.*", "electronic devices"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*headphone.*", "electronic devices"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*navigation device.*", "electronic devices"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*texting.*", "electronic devices"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*fatigue.*", "fatigue"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*sleep.*", "fatigue"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*vihecle vendalism.*", "vihecle defection"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*windshield inadequate.*", "vihecle defection"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*tire failure/inadequate.*", "vihecle defection"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*tinted windows.*", "vihecle defection"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*headlights defective.*", "vihecle defection"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*brakes defective.*", "vihecle defection"),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, ".*accelerator defective.*", "vihecle defection")
-# ) %>%
-# filter(`VEHICLE TYPE CODE 1` %in% accident$`VEHICLE TYPE CODE 1`) %>%
-# mutate(
-#     `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
-#     `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")
-# ) %>%
-# filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified") %>%
-# mutate(`CRASH HOUR` = hour(strptime(`CRASH TIME`, "%H:%M")))
 ```
 
-```{r}
-public.transportation <- read_csv("publicTrans.csv")
-structure(public.transportation)
-public.transportation <- public.transportation %>%
-    mutate(
-        `CRASH DATE` = mdy(Date),
-        subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
-        bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
-        lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
-        metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
-        total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
-    ) %>%
-    filter(
-        `CRASH DATE` >= as.Date("2021-01-01")
-    ) %>%
-    select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
+# ```{r}
+# public.transportation <- read_csv("publicTrans.csv")
+# structure(public.transportation)
+# public.transportation <- public.transportation %>%
+#     mutate(
+#         `CRASH DATE` = mdy(Date),
+#         subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
+#         bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
+#         lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
+#         metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
+#         total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
+#     ) %>%
+#     filter(
+#         `CRASH DATE` >= as.Date("2021-01-01")
+#     ) %>%
+#     select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
 
-# filter out 2021 statistics from `accidents`
-accident.2021 <- accident %>% # you can change accident into newly modified data frame
-    filter(
-        `CRASH DATE` >= as.Date("2021-01-01")
-    )
+# # filter out 2021 statistics from `accidents`
+# accident.2021 <- accident %>% # you can change accident into newly modified data frame
+#     filter(
+#         `CRASH DATE` >= as.Date("2021-01-01")
+#     )
 
-# merge data
-accident.2021 <- accident.2021 %>%
-    left_join(public.transportation, by = "CRASH DATE") %>%
-    select(`CRASH DATE`, total.public.ridership, everything())
-```
-
-
-```{r}
-traffic_vol1 <- read_csv("Traffic_Volume12_13.csv")
-traffic_vol2 <- read_csv("Traffic_Volume14_19.csv")
-traffic_vol_full <- rbind(traffic_vol1, traffic_vol2)
-
-traffic <- traffic_vol_full %>%
-    mutate(Date = mdy(Date)) %>%
-    arrange(Date) %>%
-    select(!c(Direction, `Segment ID`, `ID`, `From`, `To`)) %>%
-    group_by(Date, `Roadway Name`) %>%
-    summarise(across(.fns = c(sum))) %>% 
-    rename(`STREET NAME` = `Roadway Name`)
-```
+# # merge data
+# accident.2021 <- accident.2021 %>%
+#     left_join(public.transportation, by = "CRASH DATE") %>%
+#     select(`CRASH DATE`, total.public.ridership, everything())
+# ```
 
 
-```{r}
-public.transportation <- read_csv("publicTrans.csv")
-structure(public.transportation)
-public.transportation <- public.transportation %>%
-  mutate(
-    `CRASH DATE` = mdy(Date),
-    subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
-    bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
-    lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
-    metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
-    total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
-  ) %>%
-  filter(
-    `CRASH DATE` >= as.Date("2021-01-01")
-  ) %>%
-  select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
+# ```{r}
+# traffic_vol1 <- read_csv("Traffic_Volume12_13.csv")
+# traffic_vol2 <- read_csv("Traffic_Volume14_19.csv")
+# traffic_vol_full <- rbind(traffic_vol1, traffic_vol2)
 
-# filter out 2021 statistics from `accidents`
-accident.2021 <- accident %>% # you can change accident into newly modified data frame
-  filter(
-    `CRASH DATE` >= as.Date("2021-01-01")
-  )
+# traffic <- traffic_vol_full %>%
+#     mutate(Date = mdy(Date)) %>%
+#     arrange(Date) %>%
+#     select(!c(Direction, `Segment ID`, `ID`, `From`, `To`)) %>%
+#     group_by(Date, `Roadway Name`) %>%
+#     summarise(across(.fns = c(sum))) %>%
+#     rename(`STREET NAME` = `Roadway Name`)
+# ```
 
-# merge data
-accident.2021 <- accident.2021 %>%
-  left_join(public.transportation, by = "CRASH DATE" ) %>%
-  select(`CRASH DATE`, total.public.ridership, everything())
-```
+
+# ```{r}
+# public.transportation <- read_csv("publicTrans.csv")
+# structure(public.transportation)
+# public.transportation <- public.transportation %>%
+#   mutate(
+#     `CRASH DATE` = mdy(Date),
+#     subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
+#     bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
+#     lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
+#     metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
+#     total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
+#   ) %>%
+#   filter(
+#     `CRASH DATE` >= as.Date("2021-01-01")
+#   ) %>%
+#   select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
+
+# # filter out 2021 statistics from `accidents`
+# accident.2021 <- accident %>% # you can change accident into newly modified data frame
+#   filter(
+#     `CRASH DATE` >= as.Date("2021-01-01")
+#   )
+
+# # merge data
+# accident.2021 <- accident.2021 %>%
+#   left_join(public.transportation, by = "CRASH DATE" ) %>%
+#   select(`CRASH DATE`, total.public.ridership, everything())
+# ```
 
 
 ```{r}
@@ -327,26 +301,69 @@ contributing_factor1 <- accident %>%
 contributing_factor1
 ```
 
+```{r Sunset}
+sunset <- read_csv("sunset1.csv")
+for (i in 2:12) {
+    sunset <- sunset %>% add_row(read_csv(paste0("sunset", i, ".csv")))
+}
 
-```{r Time Separation}
-
-accident <- accident %>%
+sunset = sunset %>%
     mutate(
-        time_range = case_when(
-            hours(`CRASH TIME`) < 4 ~ "Late Night",
-            hours(`CRASH TIME`) < 8 ~ "Morning",
-            hours(`CRASH TIME`) < 12 ~ "Midday",
-            hours(`CRASH TIME`) < 16 ~ "Afternoon",
-            hours(`CRASH TIME`) < 20 ~ "Evening",
-            hours(`CRASH TIME`) < 24 ~ "Late Night"
+        Day = paste("2020", str_replace(Day, "^.*,", "")),
+        Date = ymd(Day),
+        month = month(Date),
+        day = day(Date)
+    )
+
+accidents <- accidents %>%
+    mutate(
+        month = month(`CRASH DATE`),
+        day = day(`CRASH DATE`)
+    ) %>%
+    full_join(sunset, by = c("month", "day")) %>%
+    mutate(
+        hour = hour(`CRASH TIME`),
+        minute = minute(`CRASH TIME`),
+        Sunrise = hms(Sunrise),
+        Sunset = hms(Sunset)) %>%
+    mutate(
+        sunrise_hour = hour(Sunrise),
+        sunrise_minute = minutes(Sunrise),
+        sunset_hour = hour(Sunset),
+        sunset_minute = minute(Sunset)
+    ) %>%
+    mutate(
+        daylight = ifelse(
+            (hour >= sunrise_hour & hour < sunset_hour) |
+            (hour == sunrise_hour & minute>= sunrise_minute) |
+            (hour == sunset_hour & minute <= sunset_minute),
+            1,
+            0
         )
     )
 ```
 
-```{r TimeRange Analysis}
+```{r weather join}
+accidents_full <- accidents %>%
+    rename(DATE = `CRASH DATE`) %>%
+    mutate(DATE = ymd(DATE)) %>%
+    full_join(weather, by = "DATE")
+```
 
-accident %>%
-    group_by(time_range, `CONTRIBUTING FACTOR 1`) %>%
-    summarise(count = n()) %>%
-    arrange(desc(count))
+```{r model}
+
+head(accidents_full) %>%
+    View()
+
+lm1 <- lm(`NUMBER OF PERSONS INJURED` ~ Foggy * Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + daylight, data = accidents_full)
+
+lm2 <- glm(I(`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + daylight, data = accidents_full, family = "binomial")
+
+summary(lm1)
+
+summary(lm2)
+```
+
+```{r}
+mean((accidents_full$`NUMBER OF PERSONS INJURED` > 0) == (1 / (1 + predict.glm(lm2, newdata = accidents_full)) > 0.5), na.rm = TRUE)
 ```

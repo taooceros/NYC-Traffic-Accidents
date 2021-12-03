@@ -1,1 +1,5 @@
-*.csv
+NYC Accidents 2020.csv
+Motor_Vehicle_Collisions_-_Crashes.csv
+Project_cache/
+Project_files/
+noaa*.csv

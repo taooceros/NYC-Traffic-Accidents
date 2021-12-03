@@ -307,7 +307,7 @@ for (i in 2:12) {
     sunset <- sunset %>% add_row(read_csv(paste0("sunset", i, ".csv")))
 }
 
-sunset = sunset %>%
+sunset <- sunset %>%
     mutate(
         Day = paste("2020", str_replace(Day, "^.*,", "")),
         Date = ymd(Day),
@@ -325,7 +325,8 @@ accidents <- accidents %>%
         hour = hour(`CRASH TIME`),
         minute = minute(`CRASH TIME`),
         Sunrise = hms(Sunrise),
-        Sunset = hms(Sunset)) %>%
+        Sunset = hms(Sunset)
+    ) %>%
     mutate(
         sunrise_hour = hour(Sunrise),
         sunrise_minute = minutes(Sunrise),
@@ -335,8 +336,8 @@ accidents <- accidents %>%
     mutate(
         daylight = ifelse(
             (hour >= sunrise_hour & hour < sunset_hour) |
-            (hour == sunrise_hour & minute>= sunrise_minute) |
-            (hour == sunset_hour & minute <= sunset_minute),
+                (hour == sunrise_hour & minute >= sunrise_minute) |
+                (hour == sunset_hour & minute <= sunset_minute),
             1,
             0
         )

@@ -137,12 +137,12 @@ accident_road <- accident %>%
 accident <- accident %>%
     mutate(
         time_range = case_when(
-            hours(`CRASH TIME`) < 4 ~ "Late Night",
-            hours(`CRASH TIME`) < 8 ~ "Morning",
-            hours(`CRASH TIME`) < 12 ~ "Midday",
-            hours(`CRASH TIME`) < 16 ~ "Afternoon",
-            hours(`CRASH TIME`) < 20 ~ "Evening",
-            hours(`CRASH TIME`) < 24 ~ "Late Night"
+            hour(`CRASH TIME`) < 4 ~ "Late Night",
+            hour(`CRASH TIME`) < 8 ~ "Morning",
+            hour(`CRASH TIME`) < 12 ~ "Midday",
+            hour(`CRASH TIME`) < 16 ~ "Afternoon",
+            hour(`CRASH TIME`) < 20 ~ "Evening",
+            hour(`CRASH TIME`) < 24 ~ "Late Night"
         )
     )
 ```
@@ -161,7 +161,7 @@ accidents <- accident %>%
     ) %>%
     mutate(
         `VEHICLE TYPE CODE 1` = case_when(
-            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "sedan") ~ "sadan",
+            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "sedan") ~ "sedan",
             stri_detect(`VEHICLE TYPE CODE 1`, fixed = "bus") ~ "bus",
             stri_detect(`VEHICLE TYPE CODE 1`, fixed = "wagon") ~ "wagon",
             stri_detect(`VEHICLE TYPE CODE 1`, fixed = "truck") ~ "truck",
@@ -301,7 +301,7 @@ contributing_factor1 <- accident %>%
 contributing_factor1
 ```
 
-```{r Sunset}
+```{r Sunset, echo=FALSE, cache=TRUE}
 sunset <- read_csv("sunset1.csv")
 for (i in 2:12) {
     sunset <- sunset %>% add_row(read_csv(paste0("sunset", i, ".csv")))
@@ -334,7 +334,7 @@ accidents <- accidents %>%
         sunset_minute = minute(Sunset)
     ) %>%
     mutate(
-        daylight = ifelse(
+        DayLight = ifelse(
             (hour >= sunrise_hour & hour < sunset_hour) |
                 (hour == sunrise_hour & minute >= sunrise_minute) |
                 (hour == sunset_hour & minute <= sunset_minute),
@@ -351,20 +351,91 @@ accidents_full <- accidents %>%
     full_join(weather, by = "DATE")
 ```
 
+```{r visualization}
+accidents_full %>%
+    summarise(
+        fog = sum(Foggy， na.rm = T)/n(),
+        HeavyFog = sum(Heavy.Fog, na.rm = T)/n(),
+        Smoke = sum(Smoke, na.rm = T)/n(),
+        IceFog = sum(Ice.Fog, na.rm = T)/n(),
+        no_fog = sum(ifelse(Foggy+Heavy.Fog+Smoke, 0, 1), na.rm = T)/n(),
+    ) %>%
+    pivot_longer(
+        everything(),
+        names_to= "fog_type",
+        values_to = "Proportion"
+    ) %>%
+    ggplot() +
+    geom_col(aes(x=fog_type, y=Proportion),fill = "steelblue") +
+    theme_bw() +
+    ggtitle("Proportion of Accidents by Fog Type")
+
+accidents_full %>%
+    filter(`NUMBER OF PERSONS INJURED` > 0) %>%
+    summarise(
+        no_fog = sum(ifelse(Foggy+Heavy.Fog+Smoke, 0, 1), na.rm = T)/n(),
+        fog = sum(Foggy， na.rm = T)/n(),
+        HeavyFog = sum(Heavy.Fog, na.rm = T)/n(),
+        Smoke = sum(Smoke, na.rm = T)/n(),
+        IceFog = sum(Ice.Fog, na.rm = T)/n(),
+    ) %>%
+    pivot_longer(
+        everything(),
+        names_to= "fog_type",
+        values_to = "Proportion"
+    ) %>%
+    ggplot() +
+    geom_col(aes(x=fog_type, y=Proportion), fill = "steelblue", width = 20) + 
+    theme_bw() +
+    ggtitle("Proportion of Injury Accidents by Fog Type")
+
+
+accidents_full %>%
+    summarise(
+        No_Fog = mean(`NUMBER OF PERSONS INJURED` * 
+            (ifelse(Foggy+Heavy.Fog+Smoke,0,1)), na.rm = T),
+        Fog = mean(`NUMBER OF PERSONS INJURED` * Foggy, na.rm = T),
+        Heavy.Fog = mean(`NUMBER OF PERSONS INJURED` * Heavy.Fog, na.rm = T),
+        Smoke = mean(`NUMBER OF PERSONS INJURED` * Smoke, na.rm = T),
+        Ice.Fog = mean(`NUMBER OF PERSONS INJURED` * Ice.Fog, na.rm = T)
+    ) %>%
+    pivot_longer(
+        everything(),
+        names_to= "fog_type",
+        values_to = "mean_injury"
+    ) %>%
+    ggplot(aes(fog_type, mean_injury)) + 
+    geom_col(fill = "steelblue") + 
+    xlab("Fog Type") +
+    ylab("Mean Injury (Base on degree of fog)") +
+    theme_bw() +
+    ggtitle("Mean Injury by Fog Type")
+
+accidents_full %>%
+    group_by(DayLight) %>%
+    summarise(n=n(), injury = mean (`NUMBER OF PERSONS INJURED`)) %>%
+    drop_na() %>%
+    ggplot(aes(DayLight, injury)) +
+    geom_col()
+
+
+```
+
 ```{r model}
 
 head(accidents_full) %>%
     View()
 
-lm1 <- lm(`NUMBER OF PERSONS INJURED` ~ Foggy * Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + daylight, data = accidents_full)
+lm1 <- lm(`NUMBER OF PERSONS INJURED` ~ Foggy * Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + DayLight, data = accidents_full)
 
-lm2 <- glm(I(`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + daylight, data = accidents_full, family = "binomial")
+lm2 <- glm(I(`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight, data = accidents_full, family = "binomial")
 
 summary(lm1)
 
 summary(lm2)
+
 ```
 
 ```{r}
-mean((accidents_full$`NUMBER OF PERSONS INJURED` > 0) == (1 / (1 + predict.glm(lm2, newdata = accidents_full)) > 0.5), na.rm = TRUE)
+mean((accidents_full$`NUMBER OF PERSONS INJURED` > 0) == (predict(lm2, type="response")>0.5 ), na.rm = TRUE)
 ```

@@ -48,9 +48,9 @@ weather <- weather12_21 %>%
 ```{r test accuracy}
 data <- mtcars
 trainingAndTesting <- function(dataFrame, ratio) {
-    dt <- sample(nrow(data), nrow(data) * ratio)
-    train <- data[dt, ]
-    test <- data[-dt, ]
+    dt <- sample(nrow(dataFrame), nrow(dataFrame) * ratio)
+    train <- dataFrame[dt, ]
+    test <- dataFrame[-dt, ]
     result <- list(train, test)
     return(result)
 }
@@ -58,14 +58,14 @@ trainingAndTesting <- function(dataFrame, ratio) {
 combined_set <- trainingAndTesting(data, ratio = 0.7)
 train <- combined_set[[1]]
 test <- combined_set[[2]]
-testAccuracy <- function(fit.model, train, test, var.index) {
+testAccuracy <- function(fit.model, test, var.index, result.index) {
     num <- nrow(test)
 
     errors <- rep(NA, num)
     prediction <- predict(fit.model, newdata = test[var.index])
 
     for (i in 1:num) {
-        errors[i] <- (prediction[i] - test$wt[i])^2
+        errors[i] <- (prediction[i] - test[i, result.index])^2
     }
 
     return(mean(errors))
@@ -433,12 +433,17 @@ accidents_full %>%
     ggtitle("Mean Injury by Fog Type")
 
 accidents_full %>%
+    filter(`NUMBER OF PERSONS INJURED` > 5) %>%
     group_by(DayLight) %>%
-    summarise(n = n(), injury = mean(`NUMBER OF PERSONS INJURED`)) %>%
+    summarise(
+        DayLight = as.factor(DayLight),
+        injury = `NUMBER OF PERSONS INJURED`
+    ) %>%
     drop_na() %>%
     ggplot(aes(DayLight, injury)) +
     ylab("Injury") +
-    geom_col(width = 0.5, fill = "steelblue")
+    geom_boxplot() +
+    ggtitle("Box Plot of Injury by Daylight (Injury Number > 5)")
 
 
 accidents_full %>%
@@ -487,22 +492,24 @@ accidents_full %>%
 (accidents_full[sample(nrow(accidents_full), 5000), ]) %>%
     ggplot(aes(PRCP, `NUMBER OF PERSONS INJURED`)) +
     geom_point()
-
-
 ```
 
 ```{r model}
 
-head(accidents_full) %>%
-    View()
+trainingAndTestingSet <- trainingAndTesting(accidents_full, ratio = 0.7)
+trainingAndTestingSet
 
-lm1 <- lm(`NUMBER OF PERSONS INJURED` ~ Foggy * Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` +
-    TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + DayLight, data = accidents_full)
+lm1 <- lm(
+    `NUMBER OF PERSONS INJURED` ~ Foggy * Heavy.Fog + Smoke +
+        `VEHICLE TYPE CODE 1` + TMAX + TMIN +
+        `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + DayLight,
+    data = (trainingAndTestingSet[[1]])
+)
 
 lm2 <- glm(
     I(`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` +
         TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight,
-    data = accidents_full,
+    data = trainingAndTestingSet[[1]],
     family = "binomial"
 )
 
@@ -512,6 +519,13 @@ summary(lm2)
 ```
 
 ```{r}
-mean((accidents_full$`NUMBER OF PERSONS INJURED` > 0) ==
-    (predict(lm2, type = "response") > 0.5), na.rm = TRUE)
+testAccuracy(lm2, trainingAndTestingSet[[2]], colnames(trainingAndTestingSet[[1]], "NUMBER OF PERSONS INJURED"))
+
+mean(
+    (trainingAndTestingSet[[2]]$`NUMBER OF PERSONS INJURED` > 0) == (predict(lm2,
+        newdata = trainingAndTestingSet[[2]],
+        type = "response"
+    ) > 0.25),
+    na.rm = T
+)
 ```

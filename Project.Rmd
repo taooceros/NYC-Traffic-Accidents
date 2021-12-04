@@ -437,6 +437,7 @@ accidents_full %>%
     summarise(n = n(), injury = mean(`NUMBER OF PERSONS INJURED`)) %>%
     drop_na() %>%
     ggplot(aes(DayLight, injury)) +
+    ylab("Injury") +
     geom_col(width = 0.5, fill = "steelblue")
 
 
@@ -458,6 +459,7 @@ accidents_full %>%
         aes(x = `prcp_range`, y = injury)
     ) +
     xlab("Precipitation Level") +
+    ylab("Injury") +
     geom_col(fill = "steelblue")
 
 
@@ -479,6 +481,7 @@ accidents_full %>%
         aes(x = `snow_range`, y = injury)
     ) +
     xlab("Snow Level") +
+    ylab("Injury") +
     geom_col(fill = "steelblue")
 
 (accidents_full[sample(nrow(accidents_full), 5000), ]) %>%

@@ -1,7 +1,6 @@
 ```{r}
 library(tidyverse)
 library(lubridate)
-
 ```
 
 ```{r, read_data, cache=TRUE}
@@ -153,7 +152,7 @@ require(stringi)
 
 accidents <- accident %>%
     select(`CRASH DATE`, `CRASH TIME`, `ON STREET NAME`, `CROSS STREET NAME`, `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, `NUMBER OF PEDESTRIANS INJURED`, `NUMBER OF MOTORIST INJURED`, `CONTRIBUTING FACTOR VEHICLE 1`, `VEHICLE TYPE CODE 1`) %>%
-    mutate(`CROSS STREET NAME` = case_when(is.na(`CROSS STREET NAME`) == TRUE~0, TRUE~1)) %>% 
+    mutate(`CROSS STREET NAME` = case_when(is.na(`CROSS STREET NAME`) == TRUE ~ 0, TRUE ~ 1)) %>%
     drop_na() %>%
     mutate(
         `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
@@ -170,11 +169,19 @@ accidents <- accident %>%
             T ~ "other"
         ),
         `CONTRIBUTING FACTOR VEHICLE 1` = case_when(
-            stri_detect(`CONTRIBUTING FACTOR VEHICLE 1`, regex = "(fatigued/drowsy)|(fell asleep)") ~ "Fatigue",
-            stri_detect(`CONTRIBUTING FACTOR VEHICLE 1`, regex = "collision with pedestrian") ~ "Pedestrian",
+            stri_detect(`CONTRIBUTING FACTOR VEHICLE 1`,
+                regex = "(fatigued/drowsy)|(fell asleep)"
+            ) ~ "Fatigue",
+            stri_detect(`CONTRIBUTING FACTOR VEHICLE 1`,
+                regex = "collision with pedestrian"
+            ) ~ "Pedestrian",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(accelerator defective)|(brakes defective)|(oversized vehicle)|(steering failure)|(tow hitch defective)|(other lighting defects)|(headlights defective)|(tinted windows)|(tire failure/inadequate)|(windshield inadequate)"
+                regex =
+                    "(accelerator defective)|(brakes defective)|(oversized vehicle)|
+(steering failure)|(tow hitch defective)|
+(other lighting defects)|(headlights defective)|
+(tinted windows)|(tire failure/inadequate)|(windshield inadequate)"
             ) ~ "Vehicle Defection",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
@@ -182,15 +189,19 @@ accidents <- accident %>%
             ) ~ "Drug & Alcohol",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(failure to yield right of way)|(passing or lane usage improper)|(turning improperly)|(unsafe lane changing)|(traffic control disregarded)|(unsafe speed)|(aggressive driving)|(failure to keep right)|(aggressive driving/road rage)"
+                regex = "(failure to yield right of way)|(passing or lane usage improper)|(turning improperly)|(unsafe lane changing)|
+(traffic control disregarded)|(unsafe speed)|(aggressive driving)|(failure to keep right)|(aggressive driving/road rage)"
             ) ~ "Disobey traffic rule",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(driver inattention/distraction)|(following too closely)|(backing unsafely)|(passing too closely)|(outside car distraction)|(passneger distraction)|(eating or drinking)|(listening/using headphones)|(using on board navigation device)"
+                regex = "(driver inattention/distraction)|(following too closely)|(backing unsafely)|(passing too closely)|
+(outside car distraction)|(passneger distraction)|(eating or drinking)|(listening/using headphones)|(using on board navigation device)"
             ) ~ "Driver distraction",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(other vehicular)|(pavement slippery)|(reaction to uninvolved vehicle)|(pedestrian/bicyclist)|(glare)|(obstruction/debris)|(pavement defective)|(reaction to other uninvolved vehicle)|(animals action)|(lane marking improper)|(traffic control device improper)|(driverless/runaway vehicle)"
+                regex = "(other vehicular)|(pavement slippery)|(reaction to uninvolved vehicle)|(pedestrian/bicyclist)|
+(glare)|(obstruction/debris)|(pavement defective)|(reaction to other uninvolved vehicle)|(animals action)
+|(lane marking improper)|(traffic control device improper)|(driverless/runaway vehicle)"
             ) ~ "Environmental (road, light, pedestrian)",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
@@ -292,12 +303,18 @@ accidents %>%
 # trashcode
 contributing_factor1 <- accident %>%
     mutate(
-        `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
-        `CONTRIBUTING FACTOR VEHICLE 1` = str_replace_all(`CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness")
+        `CONTRIBUTING FACTOR VEHICLE 1` =
+            tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
+        `CONTRIBUTING FACTOR VEHICLE 1` =
+            str_replace_all(
+                `CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness"
+            )
     ) %>%
     group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
     summarise(count = n()) %>%
-    filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 & `CONTRIBUTING FACTOR VEHICLE 1` != 80 & `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified")
+    filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 &
+        `CONTRIBUTING FACTOR VEHICLE 1` != 80 &
+        `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified")
 
 contributing_factor1
 ```
@@ -343,51 +360,6 @@ accidents <- accidents %>%
             0
         )
     )
-
-(accidents_full[sample(nrow(accidents_full), 100000),]) %>%
-    ggplot(aes(PRCP, `NUMBER OF PERSONS INJURED`)) +
-    geom_point()
-
-accidents_full %>%
-    mutate(
-        prcp_range = case_when(
-            PRCP==0 | is.na(PRCP) ~ "No Rain",
-            PRCP<0.4 ~ "Light Rain",
-            PRCP<1.0 ~ "Moderate Rain",
-            PRCP<2.0 ~ "Heavy Rain",
-            PRCP<4.0 ~ "Very Heavy Rain",
-            PRCP<10.0 ~ "Extreme Rain",
-            T ~ "Super Extreme Rain"
-        )
-    ) %>%
-    group_by(prcp_range) %>%
-    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
-    ggplot(
-        aes(x = `prcp_range`, y = injury), fill='navy'
-    ) +
-    geom_col()
-
-
-(accidents_full) %>%
-    mutate(
-        snow_range = case_when(
-            SNOW==0 | is.na(SNOW) ~ "No Snow",
-            SNOW<0.4 * 13 ~ "Light Snow",
-            SNOW<1.0 * 13 ~ "Moderate Snow",
-            SNOW<2.0 * 13 ~ "Heavy Snow",
-            SNOW<4.0 * 13 ~ "Very Heavy Snow",
-            SNOW<10.0 * 13~ "Extreme Snow",
-            T ~ "Super Extreme Snow"
-        )
-    ) %>%
-    group_by(snow_range) %>%
-    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
-    ggplot(
-        aes(x = `snow_range`, y = injury), fill='navy'
-    ) +
-    geom_col()
-
-
 ```
 
 ```{r weather join}
@@ -400,46 +372,49 @@ accidents_full <- accidents %>%
 ```{r visualization}
 accidents_full %>%
     summarise(
-        fog = sum(Foggy， na.rm = T)/n(),
-        HeavyFog = sum(Heavy.Fog, na.rm = T)/n(),
-        Smoke = sum(Smoke, na.rm = T)/n(),
-        IceFog = sum(Ice.Fog, na.rm = T)/n(),
-        no_fog = sum(ifelse(Foggy+Heavy.Fog+Smoke, 0, 1), na.rm = T)/n(),
+        fog = sum(Foggy, na.rm = T) / n(),
+        HeavyFog = sum(Heavy.Fog, na.rm = T) / n(),
+        Smoke = sum(Smoke, na.rm = T) / n(),
+        IceFog = sum(Ice.Fog, na.rm = T) / n(),
+        no_fog = sum(ifelse(Foggy + Heavy.Fog + Smoke, 0, 1), na.rm = T) / n(),
     ) %>%
     pivot_longer(
         everything(),
-        names_to= "fog_type",
+        names_to = "Fog Type",
         values_to = "Proportion"
     ) %>%
     ggplot() +
-    geom_col(aes(x=fog_type, y=Proportion),fill = "steelblue") +
+    geom_col(aes(x = `Fog Type`, y = Proportion), fill = "steelblue") +
     theme_bw() +
     ggtitle("Proportion of Accidents by Fog Type")
 
 accidents_full %>%
     filter(`NUMBER OF PERSONS INJURED` > 0) %>%
     summarise(
-        no_fog = sum(ifelse(Foggy+Heavy.Fog+Smoke, 0, 1), na.rm = T)/n(),
-        fog = sum(Foggy， na.rm = T)/n(),
-        HeavyFog = sum(Heavy.Fog, na.rm = T)/n(),
-        Smoke = sum(Smoke, na.rm = T)/n(),
-        IceFog = sum(Ice.Fog, na.rm = T)/n(),
+        no_fog = sum(ifelse(Foggy + Heavy.Fog + Smoke, 0, 1), na.rm = T) / n(),
+        fog = sum(Foggy, na.rm = T) / n(),
+        HeavyFog = sum(Heavy.Fog, na.rm = T) / n(),
+        Smoke = sum(Smoke, na.rm = T) / n(),
+        IceFog = sum(Ice.Fog, na.rm = T) / n(),
     ) %>%
     pivot_longer(
         everything(),
-        names_to= "fog_type",
+        names_to = "Fog Type",
         values_to = "Proportion"
     ) %>%
     ggplot() +
-    geom_col(aes(x=fog_type, y=Proportion), fill = "steelblue", width = 0.5) + 
+    geom_col(
+        aes(x = `Fog Type`, y = Proportion),
+        fill = "steelblue", width = 0.5
+    ) +
     theme_bw() +
     ggtitle("Proportion of Injury Accidents by Fog Type")
 
 
 accidents_full %>%
     summarise(
-        No_Fog = mean(`NUMBER OF PERSONS INJURED` * 
-            (ifelse(Foggy+Heavy.Fog+Smoke,0,1)), na.rm = T),
+        No_Fog = mean(`NUMBER OF PERSONS INJURED` *
+            (ifelse(Foggy + Heavy.Fog + Smoke, 0, 1)), na.rm = T),
         Fog = mean(`NUMBER OF PERSONS INJURED` * Foggy, na.rm = T),
         Heavy.Fog = mean(`NUMBER OF PERSONS INJURED` * Heavy.Fog, na.rm = T),
         Smoke = mean(`NUMBER OF PERSONS INJURED` * Smoke, na.rm = T),
@@ -447,11 +422,11 @@ accidents_full %>%
     ) %>%
     pivot_longer(
         everything(),
-        names_to= "fog_type",
+        names_to = "Fog Type",
         values_to = "mean_injury"
     ) %>%
-    ggplot(aes(fog_type, mean_injury)) + 
-    geom_col(fill = "steelblue", width = 0.5) + 
+    ggplot(aes(`Fog Type`, mean_injury)) +
+    geom_col(fill = "steelblue", width = 0.5) +
     xlab("Fog Type") +
     ylab("Mean Injury (Base on degree of fog)") +
     theme_bw() +
@@ -459,12 +434,55 @@ accidents_full %>%
 
 accidents_full %>%
     group_by(DayLight) %>%
-    summarise(n=n(), injury = mean (`NUMBER OF PERSONS INJURED`)) %>%
+    summarise(n = n(), injury = mean(`NUMBER OF PERSONS INJURED`)) %>%
     drop_na() %>%
     ggplot(aes(DayLight, injury)) +
     geom_col(width = 0.5, fill = "steelblue")
 
+(accidents_full[sample(nrow(accidents_full), 100000), ]) %>%
+    ggplot(aes(PRCP, `NUMBER OF PERSONS INJURED`)) +
+    geom_point()
 
+accidents_full %>%
+    mutate(
+        prcp_range = case_when(
+            PRCP == 0 | is.na(PRCP) ~ "No Rain",
+            PRCP < 0.4 ~ "Light Rain",
+            PRCP < 1.0 ~ "Moderate Rain",
+            PRCP < 2.0 ~ "Heavy Rain",
+            PRCP < 4.0 ~ "Very Heavy Rain",
+            PRCP < 10.0 ~ "Extreme Rain",
+            T ~ "Super Extreme Rain"
+        )
+    ) %>%
+    group_by(prcp_range) %>%
+    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
+    ggplot(
+        aes(x = `prcp_range`, y = injury),
+        fill = "navy"
+    ) +
+    geom_col()
+
+
+(accidents_full) %>%
+    mutate(
+        snow_range = case_when(
+            SNOW == 0 | is.na(SNOW) ~ "No Snow",
+            SNOW < 0.4 * 13 ~ "Light Snow",
+            SNOW < 1.0 * 13 ~ "Moderate Snow",
+            SNOW < 2.0 * 13 ~ "Heavy Snow",
+            SNOW < 4.0 * 13 ~ "Very Heavy Snow",
+            SNOW < 10.0 * 13 ~ "Extreme Snow",
+            T ~ "Super Extreme Snow"
+        )
+    ) %>%
+    group_by(snow_range) %>%
+    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
+    ggplot(
+        aes(x = `snow_range`, y = injury),
+        fill = "navy"
+    ) +
+    geom_col()
 ```
 
 ```{r model}
@@ -472,16 +490,22 @@ accidents_full %>%
 head(accidents_full) %>%
     View()
 
-lm1 <- lm(`NUMBER OF PERSONS INJURED` ~ Foggy * Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + DayLight, data = accidents_full)
+lm1 <- lm(`NUMBER OF PERSONS INJURED` ~ Foggy * Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` +
+    TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + DayLight, data = accidents_full)
 
-lm2 <- glm(I(`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight, data = accidents_full, family = "binomial")
+lm2 <- glm(
+    I(`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` +
+        TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight,
+    data = accidents_full,
+    family = "binomial"
+)
 
 summary(lm1)
 
 summary(lm2)
-
 ```
 
 ```{r}
-mean((accidents_full$`NUMBER OF PERSONS INJURED` > 0) == (predict(lm2, type="response")>0.5 ), na.rm = TRUE)
+mean((accidents_full$`NUMBER OF PERSONS INJURED` > 0) ==
+    (predict(lm2, type = "response") > 0.5), na.rm = TRUE)
 ```

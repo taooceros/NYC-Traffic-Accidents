@@ -507,8 +507,7 @@ lm1 <- lm(
 )
 
 lm2 <- glm(
-    I(`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` +
-        TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight,
+    I(`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight,
     data = trainingAndTestingSet[[1]],
     family = "binomial"
 )
@@ -525,7 +524,44 @@ mean(
     (trainingAndTestingSet[[2]]$`NUMBER OF PERSONS INJURED` > 0) == (predict(lm2,
         newdata = trainingAndTestingSet[[2]],
         type = "response"
-    ) > 0.25),
+    ) > 0.5),
     na.rm = T
+)
+
+test.predict <- (tibble(injury = (predict(lm2,
+    newdata = trainingAndTestingSet[[2]], type = "response"
+) > 0.5)) %>% drop_na())$injury
+
+test.actual <- (((trainingAndTestingSet[[2]] %>%
+    drop_na(Foggy, Heavy.Fog, Smoke, `VEHICLE TYPE CODE 1`, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, DayLight))
+["NUMBER OF PERSONS INJURED"]) > 0)
+
+
+tibble(
+    Type = c("Injury", "No Injury"),
+    Prediction = c(
+        (sum(test.predict, na.rm = T)),
+        (sum(!test.predict, na.rm = T))
+    ),
+    Actual = c(
+        sum(
+            test.actual,
+            na.rm = T
+        ),
+        sum(
+            !test.actual,
+            na.rm = T
+        )
+    ),
+    Accuracy = c(
+        sum(
+            (test.actual & test.predict),
+            na.rm = T
+        ) / sum(test.actual),
+        sum(
+            (!test.actual & !test.predict),
+            na.rm = T
+        ) / sum(!test.actual)
+    )
 )
 ```

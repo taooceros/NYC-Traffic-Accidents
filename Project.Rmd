@@ -372,11 +372,11 @@ accidents_full <- accidents %>%
 ```{r visualization}
 accidents_full %>%
     summarise(
-        fog = sum(Foggy, na.rm = T) / n(),
+        `NoFog` = sum(ifelse((Foggy + Heavy.Fog + Smoke), 0, 1), na.rm = T) / n(),
+        Fog = sum(Foggy, na.rm = T) / n(),
         HeavyFog = sum(Heavy.Fog, na.rm = T) / n(),
         Smoke = sum(Smoke, na.rm = T) / n(),
         IceFog = sum(Ice.Fog, na.rm = T) / n(),
-        no_fog = sum(ifelse(Foggy + Heavy.Fog + Smoke, 0, 1), na.rm = T) / n(),
     ) %>%
     pivot_longer(
         everything(),
@@ -391,11 +391,11 @@ accidents_full %>%
 accidents_full %>%
     filter(`NUMBER OF PERSONS INJURED` > 0) %>%
     summarise(
-        no_fog = sum(ifelse(Foggy + Heavy.Fog + Smoke, 0, 1), na.rm = T) / n(),
-        fog = sum(Foggy, na.rm = T) / n(),
-        HeavyFog = sum(Heavy.Fog, na.rm = T) / n(),
-        Smoke = sum(Smoke, na.rm = T) / n(),
-        IceFog = sum(Ice.Fog, na.rm = T) / n(),
+        `NoFog` = sum(ifelse(Foggy + Heavy.Fog + Smoke, 0, 1), na.rm = T) / n(),
+        `Fog` = sum(Foggy, na.rm = T) / n(),
+        `HeavyFog` = sum(Heavy.Fog, na.rm = T) / n(),
+        `Smoke` = sum(Smoke, na.rm = T) / n(),
+        `IceFog` = sum(Ice.Fog, na.rm = T) / n(),
     ) %>%
     pivot_longer(
         everything(),
@@ -413,12 +413,12 @@ accidents_full %>%
 
 accidents_full %>%
     summarise(
-        No_Fog = mean(`NUMBER OF PERSONS INJURED` *
+        NoFog = mean(`NUMBER OF PERSONS INJURED` *
             (ifelse(Foggy + Heavy.Fog + Smoke, 0, 1)), na.rm = T),
         Fog = mean(`NUMBER OF PERSONS INJURED` * Foggy, na.rm = T),
-        Heavy.Fog = mean(`NUMBER OF PERSONS INJURED` * Heavy.Fog, na.rm = T),
+        HeavyFog = mean(`NUMBER OF PERSONS INJURED` * Heavy.Fog, na.rm = T),
         Smoke = mean(`NUMBER OF PERSONS INJURED` * Smoke, na.rm = T),
-        Ice.Fog = mean(`NUMBER OF PERSONS INJURED` * Ice.Fog, na.rm = T)
+        IceFog = mean(`NUMBER OF PERSONS INJURED` * Ice.Fog, na.rm = T)
     ) %>%
     pivot_longer(
         everything(),

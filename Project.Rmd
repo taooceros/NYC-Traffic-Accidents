@@ -13,9 +13,6 @@ weather12_21 <- weather12_14 %>%
     add_row(weather15_17) %>%
     add_row(weather18_21)
 
-# weather12_21 <- weather12_21 %>%
-#     select(-c(ELEVATION, WSF5, WSF2, WESF, WESD, WDF5, WDF2, TSUN, TOBS, SNWD, PSUN, PGTM, MDSF, MDPR, DASF, DAPR, AWND)) %>%
-#     mutate(DATE = ymd(DATE))
 
 weather <- weather12_21 %>%
     select(!c(STATION, NAME, LATITUDE, LONGITUDE, ELEVATION)) %>%
@@ -194,34 +191,35 @@ accidents <- accident %>%
             ) ~ "Disobey traffic rule",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(driver inattention/distraction)|(following too closely)|(backing unsafely)|(passing too closely)|
-(outside car distraction)|(passneger distraction)|(eating or drinking)|(listening/using headphones)|(using on board navigation device)"
+                regex = "(driver inattention/distraction)|
+(following too closely)|(backing unsafely)|(passing too closely)|
+(outside car distraction)|(passneger distraction)|(eating or drinking)|
+(listening/using headphones)|(using on board navigation device)"
             ) ~ "Driver distraction",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(other vehicular)|(pavement slippery)|(reaction to uninvolved vehicle)|(pedestrian/bicyclist)|
-(glare)|(obstruction/debris)|(pavement defective)|(reaction to other uninvolved vehicle)|(animals action)
-|(lane marking improper)|(traffic control device improper)|(driverless/runaway vehicle)"
+                regex = "(other vehicular)|(pavement slippery)|
+(reaction to uninvolved vehicle)|(pedestrian/bicyclist)|
+(glare)|(obstruction/debris)|(pavement defective)|
+(reaction to other uninvolved vehicle)|(animals action)
+|(lane marking improper)|(traffic control device improper)|
+(driverless/runaway vehicle)"
             ) ~ "Environmental (road, light, pedestrian)",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(lost consciousness)|(physical disability)|(illness)|(illnes)|(shoulder defective)",
+                regex = "(lost consciousness)|
+(physical disability)|(illness)|
+(illnes)|(shoulder defective)",
             ) ~ "Driver Health Problem",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(prescription medication)|(driver inexperience)|(view obstructed)",
+                regex = "(prescription medication)|
+(driver inexperience)|(view obstructed)",
             ) ~ "force majeure of driver",
             T ~ "other"
         )
     ) %>%
     arrange(`CRASH DATE`)
-
-
-accidents %>%
-    group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
-    summarise(
-        death = mean(`NUMBER OF PERSONS KILLED`)
-    )
 ```
 
 # ```{r}
@@ -366,6 +364,7 @@ accidents <- accidents %>%
 accidents_full <- accidents %>%
     rename(DATE = `CRASH DATE`) %>%
     mutate(DATE = ymd(DATE)) %>%
+    rename("CROSS STREET" = "CROSS STREET NAME") %>%
     full_join(weather, by = "DATE")
 ```
 
@@ -507,9 +506,9 @@ lm1 <- lm(
 )
 
 lm2 <- glm(
-    I(`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight,
+    `NUMBER OF PERSONS INJURED` ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight,
     data = trainingAndTestingSet[[1]],
-    family = "binomial"
+    family = "quasipoisson"
 )
 
 summary(lm1)

@@ -15,7 +15,7 @@ weather12_21 <- weather12_14 %>%
 
 
 weather <- weather12_21 %>%
-    select(!c(STATION, NAME, LATITUDE, LONGITUDE, ELEVATION)) %>%
+    select(!c(STATION, NAME, ELEVATION)) %>%
     arrange(DATE) %>%
     group_by(DATE) %>%
     summarise(across(AWND:WT22, ~ mean(.x, na.rm = TRUE))) %>%
@@ -39,6 +39,35 @@ weather <- weather12_21 %>%
         Freezing.Drizzle = WT15,
         Rain = WT16,
         Unknown.Precipitation = WT19
+    )
+```
+
+```{r na analysis}
+t.test(
+    (accident %>% filter(!is.na(`BOROUGH`)))$`NUMBER OF PERSONS INJURED`,
+    (accident %>% filter(is.na(`BOROUGH`)))$`NUMBER OF PERSONS INJURED`
+)
+```
+
+```{r accident location mean}
+
+accident <- accident %>%
+    drop_na(`BOROUGH`, `LONGITUDE`, `LATITUDE`) %>%
+    filter(LONGITUDE != 0 & LATITUDE != 0)
+
+accident_injury <- accident %>%
+    filter(`NUMBER OF PERSONS INJURED` > 0)
+
+samples <- sample(nrow(accident_injury), 50000)
+
+accident[samples, ] %>%
+    ggplot() +
+    geom_point(
+        aes(
+            x = `LATITUDE`, y = `LONGITUDE`, size = (`NUMBER OF PERSONS INJURED` + 1) / 10,
+            color = `NUMBER OF PERSONS INJURED` > 0
+        ),
+        alpha = 0.1
     )
 ```
 
@@ -67,10 +96,6 @@ testAccuracy <- function(fit.model, test, var.index, result.index) {
 
     return(mean(errors))
 }
-
-fit <- lm(data$wt ~ data$vs)
-f <- testAccuracy(fit, train, test, 8)
-f
 ```
 
 ```{r, data_cleaning, cache=TRUE}
@@ -99,10 +124,6 @@ accident %>%
 #         TMAX = mean(TMAX, na.rm = T),
 #         TMIN = mean(TMIN, na.rm = T)
 #     )
-```
-
-```{r}
-
 ```
 
 ```{r}
@@ -148,7 +169,7 @@ accident <- accident %>%
 require(stringi)
 
 accidents <- accident %>%
-    select(`CRASH DATE`, `CRASH TIME`, `ON STREET NAME`, `CROSS STREET NAME`, `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, `NUMBER OF PEDESTRIANS INJURED`, `NUMBER OF MOTORIST INJURED`, `CONTRIBUTING FACTOR VEHICLE 1`, `VEHICLE TYPE CODE 1`) %>%
+    select(`CRASH DATE`, `CRASH TIME`, `ON STREET NAME`, `CROSS STREET NAME`, `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, `NUMBER OF PEDESTRIANS INJURED`, `NUMBER OF MOTORIST INJURED`, `CONTRIBUTING FACTOR VEHICLE 1`, `VEHICLE TYPE CODE 1`, `LONGITUDE`, `LATITUDE`, `BOROUGH`) %>%
     mutate(`CROSS STREET NAME` = case_when(is.na(`CROSS STREET NAME`) == TRUE ~ 0, TRUE ~ 1)) %>%
     drop_na() %>%
     mutate(
@@ -170,13 +191,13 @@ accidents <- accident %>%
                 regex = "(fatigued/drowsy)|(fell asleep)"
             ) ~ "Fatigue",
             stri_detect(`CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "collision with pedestrian"
+                regex = "pedestrian"
             ) ~ "Pedestrian",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
                 regex =
-                    "(accelerator defective)|(brakes defective)|(oversized vehicle)|
-(steering failure)|(tow hitch defective)|
+                    "(accelerator defective)|(brakes defective)|
+(oversized vehicle)|(steering failure)|(tow hitch defective)|
 (other lighting defects)|(headlights defective)|
 (tinted windows)|(tire failure/inadequate)|(windshield inadequate)"
             ) ~ "Vehicle Defection",
@@ -186,8 +207,11 @@ accidents <- accident %>%
             ) ~ "Drug & Alcohol",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(failure to yield right of way)|(passing or lane usage improper)|(turning improperly)|(unsafe lane changing)|
-(traffic control disregarded)|(unsafe speed)|(aggressive driving)|(failure to keep right)|(aggressive driving/road rage)"
+                regex = "(failure to yield right of way)|
+(passing or lane usage improper)|
+(turning improperly)|(unsafe lane changing)|
+(traffic control disregarded)|(unsafe speed)|(aggressive driving)|
+(failure to keep right)|(aggressive driving/road rage)"
             ) ~ "Disobey traffic rule",
             stri_detect(
                 `CONTRIBUTING FACTOR VEHICLE 1`,
@@ -299,22 +323,22 @@ accidents <- accident %>%
 
 ```{r}
 # trashcode
-contributing_factor1 <- accident %>%
-    mutate(
-        `CONTRIBUTING FACTOR VEHICLE 1` =
-            tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
-        `CONTRIBUTING FACTOR VEHICLE 1` =
-            str_replace_all(
-                `CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness"
-            )
-    ) %>%
-    group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
-    summarise(count = n()) %>%
-    filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 &
-        `CONTRIBUTING FACTOR VEHICLE 1` != 80 &
-        `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified")
+# contributing_factor1 <- accident %>%
+#     mutate(
+#         `CONTRIBUTING FACTOR VEHICLE 1` =
+#             tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
+#         `CONTRIBUTING FACTOR VEHICLE 1` =
+#             str_replace_all(
+#                 `CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness"
+#             )
+#     ) %>%
+#     group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
+#     summarise(count = n()) %>%
+#     filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 &
+#         `CONTRIBUTING FACTOR VEHICLE 1` != 80 &
+#         `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified")
 
-contributing_factor1
+# contributing_factor1
 ```
 
 ```{r Sunset, echo=FALSE, cache=TRUE}
@@ -359,6 +383,40 @@ accidents <- accidents %>%
         )
     )
 ```
+1. 40.788193, -73.937672
+2. 40.778374, -73.860884
+3. 40.711646, -73.976068
+4. 40.712806, -73.827198
+
+1. 40.778374, -73.937672
+2. 40.778374, -73.860884
+3. 40.712806, -73.976068
+4. 40.712806, -73.827198
+
+```{r Location Separation}
+
+accidents <- accidents %>%
+    mutate(
+        LOCATION_SPLIT = case_when(
+            LATITUDE > 40.778374 ~ case_when(
+                LONGITUDE < -73.937672 ~ "0",
+                LONGITUDE < -73.860884 ~ "1",
+                T ~ "2",
+            ),
+            LATITUDE > 40.712806 ~ case_when(
+                LONGITUDE < -73.976068 ~ "3",
+                LONGITUDE < -73.827198 ~ "4",
+                T ~ "5",
+            ),
+            T ~ case_when(
+                LONGITUDE < -73.976068 ~ "6",
+                LONGITUDE < -73.827198 ~ "7",
+                T ~ "8",
+            )
+        )
+    )
+```
+
 
 ```{r weather join}
 accidents_full <- accidents %>%
@@ -366,7 +424,20 @@ accidents_full <- accidents %>%
     mutate(DATE = ymd(DATE)) %>%
     rename("CROSS STREET" = "CROSS STREET NAME") %>%
     full_join(weather, by = "DATE")
+
+accidents_full <- accidents_full %>%
+    mutate(
+        SNOW = ifelse(is.na(SNOW), 0, SNOW),
+        PRCP = ifelse(is.na(PRCP), 0, PRCP),
+        TMAX = ifelse(is.na(TMAX), 0, TMAX),
+        TMIN = ifelse(is.na(TMIN), 0, TMIN),
+        Foggy = ifelse(is.na(Foggy), 0, Foggy)
+    )
 ```
+
+
+
+
 
 ```{r visualization}
 accidents_full %>%
@@ -506,14 +577,29 @@ lm1 <- lm(
 )
 
 lm2 <- glm(
-    `NUMBER OF PERSONS INJURED` ~ Foggy + Heavy.Fog + Smoke + `VEHICLE TYPE CODE 1` + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Smoke + `VEHICLE TYPE CODE 1` + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight + `BOROUGH`,
     data = trainingAndTestingSet[[1]],
-    family = "quasipoisson"
+    family = "binomial"
+)
+
+lm3 <- glm(
+    `NUMBER OF PERSONS INJURED` ~ Foggy + Smoke + `VEHICLE TYPE CODE 1` + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight + `BOROUGH` + `LOCATION_SPLIT`,
+    data = (
+        ((trainingAndTestingSet[[1]] %>%
+            drop_na(
+                Foggy, Heavy.Fog, Smoke,
+                `VEHICLE TYPE CODE 1`,
+                `CONTRIBUTING FACTOR VEHICLE 1`,
+                PRCP, SNOW, DayLight
+            )))),
+    family = "poisson"
 )
 
 summary(lm1)
 
 summary(lm2)
+
+summary(lm3)
 ```
 
 ```{r}
@@ -527,13 +613,23 @@ mean(
     na.rm = T
 )
 
-test.predict <- (tibble(injury = (predict(lm2,
+test.predict <- (tibble(injury = (predict(lm3,
     newdata = trainingAndTestingSet[[2]], type = "response"
 ) > 0.5)) %>% drop_na())$injury
 
-test.actual <- (((trainingAndTestingSet[[2]] %>%
-    drop_na(Foggy, Heavy.Fog, Smoke, `VEHICLE TYPE CODE 1`, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, DayLight))
-["NUMBER OF PERSONS INJURED"]) > 0)
+test.actual <- (
+    ((trainingAndTestingSet[[2]] %>%
+        drop_na(
+            Foggy, Heavy.Fog, Smoke,
+            `VEHICLE TYPE CODE 1`,
+            `CONTRIBUTING FACTOR VEHICLE 1`,
+            PRCP, SNOW, DayLight
+        ))
+    ["NUMBER OF PERSONS INJURED"]) > 0)
+
+
+quantile(predict(lm2, type = "response"), na.rm = FALSE, names = TRUE)
+quantile(accidents_full$`NUMBER OF PERSONS INJURED`, na.rm = T)
 
 
 tibble(

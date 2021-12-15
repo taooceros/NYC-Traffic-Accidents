@@ -171,7 +171,6 @@ require(stringi)
 accidents <- accident %>%
     select(`CRASH DATE`, `CRASH TIME`, `ON STREET NAME`, `CROSS STREET NAME`, `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, `NUMBER OF PEDESTRIANS INJURED`, `NUMBER OF MOTORIST INJURED`, `CONTRIBUTING FACTOR VEHICLE 1`, `VEHICLE TYPE CODE 1`, `LONGITUDE`, `LATITUDE`, `BOROUGH`) %>%
     mutate(`CROSS STREET NAME` = case_when(is.na(`CROSS STREET NAME`) == TRUE ~ 0, TRUE ~ 1)) %>%
-    drop_na() %>%
     mutate(
         `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
         `ON STREET NAME` = tolower(`ON STREET NAME`),
@@ -562,9 +561,35 @@ accidents_full %>%
 (accidents_full[sample(nrow(accidents_full), 5000), ]) %>%
     ggplot(aes(PRCP, `NUMBER OF PERSONS INJURED`)) +
     geom_point()
+
 ```
 
 ```{r model}
+
+af<-accidents_full%>%select(Foggy, Smoke,Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN,`CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW , Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`)%>%drop_na()
+set.seed(123)
+rows = sample(nrow(af))#Randomly reorder the row of the dataset.
+train_num = as.integer(length(rows)*0.8)#Separating the dataset to two parts, one for training the model, and the other for testing the model.
+test_num = train_num+1
+len <- nrow(af%>%drop_na())
+train_df<-af[rows,][1:train_num,]
+test_df<-af[rows,][test_num:len,]
+
+
+lm_1 <- lm(
+    `NUMBER OF PERSONS INJURED` ~ Foggy+ Smoke+Heavy.Fog+Foggy*Heavy.Fog+ `VEHICLE TYPE CODE 1`+TMAX+ TMIN+`CONTRIBUTING FACTOR VEHICLE 1`+ PRCP+ SNOW+ Ice.Fog+ DayLight+`BOROUGH`+ `LOCATION_SPLIT`+ `CROSS STREET`,
+    data = (train_df)
+)
+
+test_df<-test_df%>%mutate(status=case_when(`NUMBER OF PERSONS INJURED`>0~1, TRUE~0))
+
+probabilities <- predict(lm_1, type='response', newdata =test_df )
+predictions <- ifelse(probabilities>0.5, 1, 0)
+sum(predictions== test_df$status)/nrow(test_df)
+sum(test_df$status==0)/nrow(test_df)
+```
+
+```{r}
 
 trainingAndTestingSet <- trainingAndTesting(accidents_full, ratio = 0.7)
 trainingAndTestingSet

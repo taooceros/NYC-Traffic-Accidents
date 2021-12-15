@@ -18,7 +18,7 @@ weather <- weather12_21 %>%
     select(!c(STATION, NAME, ELEVATION)) %>%
     arrange(DATE) %>%
     group_by(DATE) %>%
-    summarise(across(AWND:WT22, ~ mean(.x, na.rm = TRUE))) %>%
+    summarise(across(AWND:WT22, ~ mean(as.numeric(.x), na.rm = TRUE))) %>%
     replace(is.na(.), 0) %>%
     rename(
         Foggy = WT01,
@@ -628,8 +628,6 @@ summary(lm3)
 ```
 
 ```{r}
-testAccuracy(lm2, trainingAndTestingSet[[2]], colnames(trainingAndTestingSet[[1]], "NUMBER OF PERSONS INJURED"))
-
 mean(
     (trainingAndTestingSet[[2]]$`NUMBER OF PERSONS INJURED` > 0) == (predict(lm2,
         newdata = trainingAndTestingSet[[2]],

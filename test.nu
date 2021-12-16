@@ -10,7 +10,7 @@ filterVehicle ($vehicle) "5"
 # Documentation for filterVehicle
 def filterVehicle [df_origin, name] {
 
-    let $df = ($df_origin | dataframe column "VEHICLE TYPE CODE 1")
+    let $df = ($df_origin | dataframe column $"VEHICLE TYPE CODE ($name)")
 
     $df | dataframe is-not-null | dataframe aggregate sum
 

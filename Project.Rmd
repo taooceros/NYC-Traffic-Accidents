@@ -10,32 +10,24 @@ truck_type1 <- read_csv("truck_type-1.csv") %>%
     rename(type1 = type)
 truck_type2 <- read_csv("truck_type-2.csv") %>%
     rename(type2 = type)
-truck_type3 <- read_csv("truck_type-3.csv") %>%
+truck_type3 <- read_csv("truck_type-3.csv")%>%
     rename(type3 = type)
-truck_type4 <- read_csv("truck_type-4.csv") %>%
+truck_type4 <- read_csv("truck_type-4.csv")%>%
     rename(type4 = type)
-truck_type5 <- read_csv("truck_type-5.csv") %>%
+truck_type5 <- read_csv("truck_type-5.csv")%>%
     rename(type5 = type)
-accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv") %>%
+accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv")%>%
     left_join(truck_type1, by = "COLLISION_ID") %>%
     left_join(truck_type2, by = "COLLISION_ID") %>%
     left_join(truck_type3, by = "COLLISION_ID") %>%
     left_join(truck_type4, by = "COLLISION_ID") %>%
     left_join(truck_type5, by = "COLLISION_ID") %>%
-    select(-c(
-        `VEHICLE TYPE CODE 1`,
-        `VEHICLE TYPE CODE 2`,
-        `VEHICLE TYPE CODE 3`,
-        `VEHICLE TYPE CODE 4`,
-        `VEHICLE TYPE CODE 5`
-    )) %>%
-    rename(
-        `VEHICLE TYPE CODE 1` = type1,
-        `VEHICLE TYPE CODE 2` = type2,
-        `VEHICLE TYPE CODE 3` = type3,
-        `VEHICLE TYPE CODE 4` = type4,
-        `VEHICLE TYPE CODE 5` = type5
-    )
+    select(-c(`VEHICLE TYPE CODE 1`, `VEHICLE TYPE CODE 2`, `VEHICLE TYPE CODE 3`, `VEHICLE TYPE CODE 4`, `VEHICLE TYPE CODE 5`)) %>%
+    rename(`VEHICLE TYPE CODE 1` = type1, 
+           `VEHICLE TYPE CODE 2` = type2,
+           `VEHICLE TYPE CODE 3` = type3,
+           `VEHICLE TYPE CODE 4` = type4,
+           `VEHICLE TYPE CODE 5` = type5)
 
 weather12_14 <- read_csv("noaa12_14.csv")
 weather15_17 <- read_csv("noaa15_17.csv")
@@ -381,12 +373,29 @@ accidents_full %>%
 
 ```
 
+```{r}
+accidents_full <- accidents_full %>%
+    mutate(truck_involved = (
+        (`VEHICLE TYPE CODE 1` == "Truck") |
+            (`VEHICLE TYPE CODE 2` == "Truck") |
+            (`VEHICLE TYPE CODE 3` == "Truck") |
+            (`VEHICLE TYPE CODE 4` == "Truck") |
+            (`VEHICLE TYPE CODE 5` == "Truck")
+    ),
+    two_wheel_involved = (
+        (`VEHICLE TYPE CODE 1` %in% c("Bike", "Motor")) |
+            (`VEHICLE TYPE CODE 2` %in% c("Bike", "Motor")) |
+            (`VEHICLE TYPE CODE 3` %in% c("Bike", "Motor")) |
+            (`VEHICLE TYPE CODE 4` %in% c("Bike", "Motor")) |
+            (`VEHICLE TYPE CODE 5` %in% c("Bike", "Motor"))
+    ))
+```
 
 
 ```{r model}
 
 af <- accidents_full %>%
-    select(Foggy, Smoke, Heavy.Fog, startsWith(`VEHICLE TYPE CODE`), TMAX, TMIN, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, Ice.Fog, DayLight, vehicle, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`, `LONGITUDE`, `LATITUDE`) %>%
+    select(Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`, `LONGITUDE`, `LATITUDE`) %>%
     drop_na()
 set.seed(123)
 rows <- sample(nrow(af)) # Randomly reorder the row of the dataset.
@@ -398,7 +407,7 @@ test_df <- af[rows, ][test_num:len, ]
 
 
 lm_1 <- lm(
-    `NUMBER OF PERSONS INJURED` ~ Foggy + Smoke + Heavy.Fog + Foggy * Heavy.Fog + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + DayLight + vehicle + `BOROUGH` + `LOCATION_SPLIT` + `CROSS STREET`,
+    `NUMBER OF PERSONS INJURED` ~ Foggy + Smoke + Heavy.Fog + Foggy * Heavy.Fog + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + DayLight + `BOROUGH` + `LOCATION_SPLIT` + `CROSS STREET`,
     data = (train_df)
 )
 
@@ -413,11 +422,11 @@ sum(test_df$status == 0) / nrow(test_df)
 
 ```{r accident location mean}
 
-accident <- new_accident %>%
+accidents_full <- accidents_full %>%
     drop_na(`BOROUGH`, `LONGITUDE`, `LATITUDE`) %>%
     filter(LONGITUDE != 0 & LATITUDE != 0)
 
-accident_injury <- new_accident %>%
+accident_injury <- accidents_full %>%
     filter(`NUMBER OF PERSONS INJURED` > 0)
 
 samples <- sample(nrow(accident_injury), 150000)

@@ -449,162 +449,162 @@ match_vehicle <- function(originVehicle) {
 (?omme)|
 (1)|
 (11111)|
-(12 Pa)|
-(12 PA)|
-(15 Pa)|
+(12 pa)|
+(12 pa)|
+(15 pa)|
 (197209)|
-(1S)|
-(2 TON)|
+(1s)|
+(2 ton)|
 (2 - to)|
 (2000)|
 (250-3)|
 (315 e)|
-(3DC-)|
+(3dc-)|
 (985)|
 (994)|
 (9999)|
-(A-ONE)|
-(AERIA)|
-(APPOR)|
-(APP)|
-(BLACK)|
-(BOAT)|
-(BROOM)|
-(BS)|
-(BTM)|
-(C0MME)|
-(CAMP)|
-(CART)|
-(CASE)|
-(CHART)|
-(CHERR)|
-(CON E)|
-(D/V WB)|
-(Dent and S)|
-(DIESE)|
-(DOT EQUIPM)|
-(DOT T)|
+(a-one)|
+(aeria)|
+(appor)|
+(app)|
+(black)|
+(boat)|
+(broom)|
+(bs)|
+(btm)|
+(c0mme)|
+(camp)|
+(cart)|
+(case)|
+(chart)|
+(cherr)|
+(con e)|
+(d/v wb)|
+(dent and s)|
+(diese)|
+(dot equipm)|
+(dot t)|
 (e com)|
 (e tow)|
 (east)|
-(EC3)|
-(ENGIN)|
-(ENGINE SP0)|
+(ec3)|
+(engin)|
+(engine sp0)|
 (f15)|
-(FREE)|
-(DEPARTMENT)|
-(G com)|
-(G COM)|
-(G PSD)|
+(free)|
+(department)|
+(g com)|
+(g com)|
+(g psd)|
 (g scl)|
 (g spc)|
-(GE/SC)|
-(GLBEN)|
-(GOVER)|
+(ge/sc)|
+(glben)|
+(gover)|
 (government)|
-(Government)|
-(GRAY)|
-(GREEN)|
-(HD To)|
-(HI TA)|
+(government)|
+(gray)|
+(green)|
+(hd to)|
+(hi ta)|
 (hi-lo)|
 (high)|
-(HIGHL)|
-(Horse)|
-(HORSE)|
-(HOSRE)|
-(HOUSE)|
-(Hrse)|
-(HWH)|
-(I-haul)|
+(highl)|
+(horse)|
+(horse)|
+(hosre)|
+(house)|
+(hrse)|
+(hwh)|
+(i-haul)|
 (inter)|
-(Inter)|
-(INTER)|
-(KP160)|
-(LEFT)|
-(LIGHT TRAI	)|
-(LIGHT)|
-(LIVER)|
-(LIVERY VEHICLE)|
-(Log)|
-(LTRL)|
-(MARK)|
-(Marke	)|
+(inter)|
+(inter)|
+(kp160)|
+(left)|
+(light trai	)|
+(light)|
+(liver)|
+(livery vehicle)|
+(log)|
+(ltrl)|
+(mark)|
 (marke)|
-(mcy	)|
+(marke)|
+(mcy)|
 (mc)|
-(MCY B)|
-(Mecha)|
-(UNKOW)|
-(UNKNOWN)|
-(UNKNO)|
-(UNKN)|
-(UNK)|
+(mcy b)|
+(mecha)|
+(unkow)|
+(unknown)|
+(unkno)|
+(unkn)|
+(unk)|
 (ukn)|
 (rmp)|
 (none)|
 (na)|
-(N/A)|
 (n/a)|
-(VAB)|
-(SURET)|
+(n/a)|
+(vab)|
+(suret)|
 (skywatch)|
 (skateboard)|
 (skate)|
 (road)|
-(REPAI)|
-(REP)|
-(Multi-Wheeled Vehicle)|
-(YELLO)|
+(repai)|
+(rep)|
+(multi-wheeled vehicle)|
+(yello)|
 (work)|
 (winnie)|
 (white)|
 (whit)|
 (wheel)|
-(US)|
+(us)|
 (trans)|
 (te)|
-(SUB)|
+(sub)|
 (sterl)|
 (stak)|
 (special co)|
 (spec)|
 (spc)|
 (self)|
-(self INSUR)|
+(self insur)|
 (seagr)|
-(SC)|
-(SANMEN COU)|
+(sc)|
+(sanmen cou)|
 (rood)|
-(RENTA)|
+(renta)|
 (red t)|
-(PSP)|
-(PSH)|
-(PSD)|
-(PS)|
+(psp)|
+(psh)|
+(psd)|
+(ps)|
 (pois)|
 (pet)|
 (p/sh)|
-(P/SH)|
-(OZ MO)|
-(OTHER)|
-(\177omm)|
-(OIL T)|
+(p/sh)|
+(oz mo)|
+(other)|
+(\\177omm)|
+(oil t)|
 (nycta)|
 (nycha)|
-(NYC D)|
-(NYC a)|
-(NTTRL)|
-(NS AM)|
-(NOT I)|
-(NonMotordS)|
-(NO/BU)|
-(NEW Y)|
+(nyc d)|
+(nyc a)|
+(nttrl)|
+(ns am)|
+(not i)|
+(nonmotords)|
+(no/bu)|
+(new y)|
 (nat grid t)|
 (mtr s)|
-(MOVIN)|
-(City)|
-(CITY)", "\n")
+(movin)|
+(city)|
+(city)", "\n")
 
 
     later_truck_match <-

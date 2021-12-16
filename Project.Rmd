@@ -6,8 +6,29 @@ library(lubridate)
 ```{r, read_data, cache=TRUE}
 
 set.seed(203741092)
+truck_type1 <- read_csv("truck_type-1.csv") %>%
+    rename(type1 = type)
+truck_type2 <- read_csv("truck_type-2.csv") %>%
+    rename(type2 = type)
+truck_type3 <- read_csv("truck_type-3.csv")%>%
+    rename(type3 = type)
+truck_type4 <- read_csv("truck_type-4.csv")%>%
+    rename(type4 = type)
+truck_type5 <- read_csv("truck_type-5.csv")%>%
+    rename(type5 = type)
+accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv")%>%
+    left_join(truck_type1, by = "COLLISION_ID") %>%
+    left_join(truck_type2, by = "COLLISION_ID") %>%
+    left_join(truck_type3, by = "COLLISION_ID") %>%
+    left_join(truck_type4, by = "COLLISION_ID") %>%
+    left_join(truck_type5, by = "COLLISION_ID") %>%
+    select(-c(`VEHICLE TYPE CODE 1`, `VEHICLE TYPE CODE 2`, `VEHICLE TYPE CODE 3`, `VEHICLE TYPE CODE 4`, `VEHICLE TYPE CODE 5`)) %>%
+    rename(`VEHICLE TYPE CODE 1` = type1, 
+           `VEHICLE TYPE CODE 2` = type2,
+           `VEHICLE TYPE CODE 3` = type3,
+           `VEHICLE TYPE CODE 4` = type4,
+           `VEHICLE TYPE CODE 5` = type5)
 
-accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv")
 weather12_14 <- read_csv("noaa12_14.csv")
 weather15_17 <- read_csv("noaa15_17.csv")
 weather18_21 <- read_csv("noaa18_21.csv")
@@ -97,15 +118,6 @@ accident %>%
         `CRASH MONTH` = month(`CRASH DATE`),
         `CRASH YEAR` = year(`CRASH DATE`)
     )
-
-# weather12_21 <- weather12_21 %>%
-#     group_by(DATE) %>%
-#     summarise(
-#         PRCP = mean(PRCP, na.rm = T),
-#         SNOW = mean(SNOW, na.rm = T),
-#         TMAX = mean(TMAX, na.rm = T),
-#         TMIN = mean(TMIN, na.rm = T)
-#     )
 ```
 
 ```{r}
@@ -117,13 +129,6 @@ collisions_location <- accident %>%
     filter(year %in% c(2019, 2020, 2021))
 collisions_location
 ```
-
-
-# ```{r, include=F}
-# ggplot(collisions_location, aes(x = LATITUDE, y = LONGITUDE)) +
-#     geom_point(alpha = 0.01, size = 0.5, col = "darkgreen") +
-#     ggtitle("Location of NYC Traffic Collision")
-# ```
 
 ```{r}
 accident_road <- accident %>%
@@ -147,196 +152,6 @@ accident <- accident %>%
     )
 ```
 
-```{r Vehicle Match}
-source("vehicle_match.R")
-accident3 <- accident %>%
-    mutate(
-        vehicle = match_vehicle(
-            `CONTRIBUTING FACTOR VEHICLE 1`
-        )
-    )
-
-
-write_csv(accident3, "accident_transform.csv")
-
-```
-
-
-```{r}
-
-require(stringi)
-
-accidents <- accident %>%
-    select(`CRASH DATE`, `CRASH TIME`, `ON STREET NAME`, `CROSS STREET NAME`, `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, `NUMBER OF PEDESTRIANS INJURED`, `NUMBER OF MOTORIST INJURED`, `CONTRIBUTING FACTOR VEHICLE 1`, `VEHICLE TYPE CODE 1`, `LONGITUDE`, `LATITUDE`, `BOROUGH`) %>%
-    mutate(`CROSS STREET NAME` = case_when(is.na(`CROSS STREET NAME`) == TRUE ~ 0, TRUE ~ 1)) %>%
-    mutate(
-        `VEHICLE TYPE CODE 1` = tolower(`VEHICLE TYPE CODE 1`),
-        `ON STREET NAME` = tolower(`ON STREET NAME`),
-        `CONTRIBUTING FACTOR VEHICLE 1` = tolower(`CONTRIBUTING FACTOR VEHICLE 1`)
-    ) %>%
-    mutate(
-        `VEHICLE TYPE CODE 1` = case_when(
-            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "sedan") ~ "sedan",
-            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "bus") ~ "bus",
-            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "wagon") ~ "wagon",
-            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "truck") ~ "truck",
-            stri_detect(`VEHICLE TYPE CODE 1`, fixed = "bicycle") ~ "bicycle",
-            T ~ "other"
-        ),
-        `CONTRIBUTING FACTOR VEHICLE 1` = case_when(
-            stri_detect(`CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(fatigued/drowsy)|(fell asleep)"
-            ) ~ "Fatigue",
-            stri_detect(`CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "pedestrian"
-            ) ~ "Pedestrian",
-            stri_detect(
-                `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex =
-                    "(accelerator defective)|(brakes defective)|
-(oversized vehicle)|(steering failure)|(tow hitch defective)|
-(other lighting defects)|(headlights defective)|
-(tinted windows)|(tire failure/inadequate)|(windshield inadequate)"
-            ) ~ "Vehicle Defection",
-            stri_detect(
-                `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(alchohol involvement)|(drugs (illegal))"
-            ) ~ "Drug & Alcohol",
-            stri_detect(
-                `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(failure to yield right of way)|
-(passing or lane usage improper)|
-(turning improperly)|(unsafe lane changing)|
-(traffic control disregarded)|(unsafe speed)|(aggressive driving)|
-(failure to keep right)|(aggressive driving/road rage)"
-            ) ~ "Disobey traffic rule",
-            stri_detect(
-                `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(driver inattention/distraction)|
-(following too closely)|(backing unsafely)|(passing too closely)|
-(outside car distraction)|(passneger distraction)|(eating or drinking)|
-(listening/using headphones)|(using on board navigation device)"
-            ) ~ "Driver distraction",
-            stri_detect(
-                `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(other vehicular)|(pavement slippery)|
-(reaction to uninvolved vehicle)|(pedestrian/bicyclist)|
-(glare)|(obstruction/debris)|(pavement defective)|
-(reaction to other uninvolved vehicle)|(animals action)
-|(lane marking improper)|(traffic control device improper)|
-(driverless/runaway vehicle)"
-            ) ~ "Environmental (road, light, pedestrian)",
-            stri_detect(
-                `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(lost consciousness)|
-(physical disability)|(illness)|
-(illnes)|(shoulder defective)",
-            ) ~ "Driver Health Problem",
-            stri_detect(
-                `CONTRIBUTING FACTOR VEHICLE 1`,
-                regex = "(prescription medication)|
-(driver inexperience)|(view obstructed)",
-            ) ~ "force majeure of driver",
-            T ~ "other"
-        )
-    ) %>%
-    arrange(`CRASH DATE`)
-```
-
-# ```{r}
-# public.transportation <- read_csv("publicTrans.csv")
-# structure(public.transportation)
-# public.transportation <- public.transportation %>%
-#     mutate(
-#         `CRASH DATE` = mdy(Date),
-#         subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
-#         bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
-#         lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
-#         metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
-#         total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
-#     ) %>%
-#     filter(
-#         `CRASH DATE` >= as.Date("2021-01-01")
-#     ) %>%
-#     select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
-
-# # filter out 2021 statistics from `accidents`
-# accident.2021 <- accident %>% # you can change accident into newly modified data frame
-#     filter(
-#         `CRASH DATE` >= as.Date("2021-01-01")
-#     )
-
-# # merge data
-# accident.2021 <- accident.2021 %>%
-#     left_join(public.transportation, by = "CRASH DATE") %>%
-#     select(`CRASH DATE`, total.public.ridership, everything())
-# ```
-
-
-# ```{r}
-# traffic_vol1 <- read_csv("Traffic_Volume12_13.csv")
-# traffic_vol2 <- read_csv("Traffic_Volume14_19.csv")
-# traffic_vol_full <- rbind(traffic_vol1, traffic_vol2)
-
-# traffic <- traffic_vol_full %>%
-#     mutate(Date = mdy(Date)) %>%
-#     arrange(Date) %>%
-#     select(!c(Direction, `Segment ID`, `ID`, `From`, `To`)) %>%
-#     group_by(Date, `Roadway Name`) %>%
-#     summarise(across(.fns = c(sum))) %>%
-#     rename(`STREET NAME` = `Roadway Name`)
-# ```
-
-
-# ```{r}
-# public.transportation <- read_csv("publicTrans.csv")
-# structure(public.transportation)
-# public.transportation <- public.transportation %>%
-#   mutate(
-#     `CRASH DATE` = mdy(Date),
-#     subway.ridership = as.numeric(`Subways: Total Estimated Ridership`),
-#     bus.ridership = as.numeric(`Buses: Total Estimated Ridership`),
-#     lirr.ridership = as.numeric(`LIRR: Total Estimated Ridership`),
-#     metroNorth.ridership = as.numeric(`Metro-North: Total Estimated Ridership`),
-#     total.public.ridership = subway.ridership + bus.ridership + lirr.ridership + metroNorth.ridership
-#   ) %>%
-#   filter(
-#     `CRASH DATE` >= as.Date("2021-01-01")
-#   ) %>%
-#   select(`CRASH DATE`, subway.ridership, bus.ridership, lirr.ridership, metroNorth.ridership, total.public.ridership)
-
-# # filter out 2021 statistics from `accidents`
-# accident.2021 <- accident %>% # you can change accident into newly modified data frame
-#   filter(
-#     `CRASH DATE` >= as.Date("2021-01-01")
-#   )
-
-# # merge data
-# accident.2021 <- accident.2021 %>%
-#   left_join(public.transportation, by = "CRASH DATE" ) %>%
-#   select(`CRASH DATE`, total.public.ridership, everything())
-# ```
-
-
-```{r}
-# trashcode
-# contributing_factor1 <- accident %>%
-#     mutate(
-#         `CONTRIBUTING FACTOR VEHICLE 1` =
-#             tolower(`CONTRIBUTING FACTOR VEHICLE 1`),
-#         `CONTRIBUTING FACTOR VEHICLE 1` =
-#             str_replace_all(
-#                 `CONTRIBUTING FACTOR VEHICLE 1`, "illness*", "illness"
-#             )
-#     ) %>%
-#     group_by(`CONTRIBUTING FACTOR VEHICLE 1`) %>%
-#     summarise(count = n()) %>%
-#     filter(`CONTRIBUTING FACTOR VEHICLE 1` != 1 &
-#         `CONTRIBUTING FACTOR VEHICLE 1` != 80 &
-#         `CONTRIBUTING FACTOR VEHICLE 1` != "unspecified")
-
-# contributing_factor1
-```
 
 ```{r Sunset, echo=FALSE, cache=TRUE}
 sunset <- read_csv("sunset1.csv")
@@ -352,7 +167,7 @@ sunset <- sunset %>%
         day = day(Date)
     )
 
-accidents <- accidents %>%
+accidents <- accident %>%
     mutate(
         month = month(`CRASH DATE`),
         day = day(`CRASH DATE`)
@@ -431,10 +246,6 @@ accidents_full <- accidents_full %>%
         Foggy = ifelse(is.na(Foggy), 0, Foggy)
     )
 ```
-
-
-
-
 
 ```{r visualization}
 accidents_full %>%
@@ -562,10 +373,12 @@ accidents_full %>%
 
 ```
 
+
+
 ```{r model}
 
 af <- accidents_full %>%
-    select(Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`, `LONGITUDE`, `LATITUDE`) %>%
+    select(Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, Ice.Fog, DayLight, vehicle, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`, `LONGITUDE`, `LATITUDE`) %>%
     drop_na()
 set.seed(123)
 rows <- sample(nrow(af)) # Randomly reorder the row of the dataset.
@@ -577,7 +390,7 @@ test_df <- af[rows, ][test_num:len, ]
 
 
 lm_1 <- lm(
-    `NUMBER OF PERSONS INJURED` ~ Foggy + Smoke + Heavy.Fog + Foggy * Heavy.Fog + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + DayLight + `BOROUGH` + `LOCATION_SPLIT` + `CROSS STREET`,
+    `NUMBER OF PERSONS INJURED` ~ Foggy + Smoke + Heavy.Fog + Foggy * Heavy.Fog + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + DayLight + vehicle + `BOROUGH` + `LOCATION_SPLIT` + `CROSS STREET`,
     data = (train_df)
 )
 
@@ -589,13 +402,14 @@ sum(predictions == test_df$status) / nrow(test_df)
 sum(test_df$status == 0) / nrow(test_df)
 ```
 
+
 ```{r accident location mean}
 
-accident <- accident %>%
+accident <- new_accident %>%
     drop_na(`BOROUGH`, `LONGITUDE`, `LATITUDE`) %>%
     filter(LONGITUDE != 0 & LATITUDE != 0)
 
-accident_injury <- accident %>%
+accident_injury <- new_accident %>%
     filter(`NUMBER OF PERSONS INJURED` > 0)
 
 samples <- sample(nrow(accident_injury), 150000)
@@ -616,7 +430,7 @@ train_df[samples, ] %>%
 library(randomForest)
 
 af2 <- accidents_full %>%
-    select(Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`, `LATITUDE`, `LONGITUDE`) %>%
+    select(Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, Ice.Fog, DayLight, vehicle, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`, `LATITUDE`, `LONGITUDE`) %>%
     drop_na()
 
 sampleIndex <- sample(nrow(af), 25000)
@@ -751,3 +565,8 @@ tibble(
     )
 )
 ```
+
+
+
+
+

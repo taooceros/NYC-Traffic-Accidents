@@ -1,0 +1,851 @@
+Unknown (due to bad recorder)
+(0)|
+(?omme)|
+(1)|
+(11111)|
+(12 Pa)|
+(12 PA)|
+(15 Pa)|
+(197209)|
+(1S)|
+(2 TON)|
+(2 - to)|
+(2000)|
+(250-3)|
+(315 e)|
+(3DC-)|
+(985)|
+(994)|
+(9999)|
+(A-ONE)|
+(AERIA)|
+(APPOR)|
+(APP)|
+(BLACK)|
+(BOAT)|
+(BROOM)|
+(BS)|
+(BTM)|
+(C0MME)|
+(CAMP)|
+(CART)|
+(CASE)|
+(CHART)|
+(CHERR)|
+(CON E)|
+(D/V WB)|
+(Dent and S)|
+(DIESE)|
+(DOT EQUIPM)|
+(DOT T)|
+(e com)|
+(e tow)|
+(east)|
+(EC3)|
+(ENGIN)|
+(ENGINE SP0)|
+(f15)|
+(FREE)|
+(DEPARTMENT)|
+(G com)|
+(G COM)|
+(G PSD)|
+(g scl)|
+(g spc)|
+(GE/SC)|
+(GLBEN)|
+(GOVER)|
+(government)|
+(Government)|
+(GRAY)|
+(GREEN)|
+(HD To)|
+(HI TA)|
+(hi-lo)|
+(high)|
+(HIGHL)|
+(Horse)|
+(HORSE)|
+(HOSRE)|
+(HOUSE)|
+(Hrse)|
+(HWH)|
+(I-haul)|
+(inter)|
+(Inter)|
+(INTER)|
+(KP160)|
+(LEFT)|
+(LIGHT TRAI	)|
+(LIGHT)|
+(LIVER)|
+(LIVERY VEHICLE)|
+(Log)|
+(LTRL)|
+(MARK)|
+(Marke	)|
+(marke)|
+(mcy	)|
+(mc)|
+(MCY B)|
+(Mecha)|
+(UNKOW)|
+(UNKNOWN)|
+(UNKNO)|
+(UNKN)|
+(UNK)|
+(ukn)|
+(rmp)|
+(none)|
+(na)|
+(N/A)|
+(n/a)|
+(VAB)|
+(SURET)|
+(skywatch)|
+(skateboard)|
+(skate)|
+(road)|
+(REPAI)|
+(REP)|
+(Multi-Wheeled Vehicle)|
+(YELLO)|
+(work)|
+(winnie)|
+(white)|
+(whit)|
+(wheel)|
+(US)|
+(trans)|
+(te)|
+(SUB)|
+(sterl)|
+(stak)|
+(special co)|
+(spec)|
+(spc)|
+(self)|
+(self INSUR)|
+(seagr)|
+(SC)|
+(SANMEN COU)|
+(rood)|
+(RENTA)|
+(red t)|
+(PSP)|
+(PSH)|
+(PSD)|
+(PS)|
+(pois)|
+(pet)|
+(p/sh)|
+(P/SH)|
+(OZ MO)|
+(OTHER)|
+(\177omm)|
+(OIL T)|
+(nycta)|
+(nycha)|
+(NYC D)|
+(NYC a)|
+(NTTRL)|
+(NS AM)|
+(NOT I)|
+(NonMotordS)|
+(NO/BU)|
+(NEW Y)|
+(nat grid t)|
+(mtr s)|
+(MOVIN)|
+(City)|
+(CITY)
+
+Truck
+(18 WH)|
+(18 WHEELER)|
+(26ft)|
+(35 FT)|
+(4 axe)|
+(ARMOR)|
+(Armored Truck)|
+(BACK HOE)|
+(BACK)|
+(backh)|
+(Backh)|
+(BACKH)|
+(backhoe)|
+(Backhoe Lo)|
+(Beverage Truck)|
+(BOOM)|
+(box t)|
+(Box T)|
+(BOX T)|
+(box truck)|
+(Box truck)|
+(Box Truck)|
+(BOX TRUCK)|
+(boxtr)|
+(BUCKE)|
+(Bucket Tru)|
+(Bucketload)|
+(Bulk Agriculture)|
+(BULLDOZER)|
+(BULLD)|
+(bulld)|
+(cargo)|
+(Cargo)|
+(CARGO)|
+(CARGO VAN)|
+(CATAPILLAR)|
+(cemen)|
+(CEMEN)|
+(Cement tru)|
+(Cement Tru)|
+(cm)|
+(CMIXER)|
+(CMS-T)|
+(Comix)|
+(con ed tru)|
+(Concrete Mixer)|
+(CAT)|
+(CAT P)|
+(CAT.)|
+(const)|
+(Const)|
+(CONST)|
+(Constructi)|
+(CONT)|
+(CONTR)|
+(Crane)|
+(CRANE)|
+(crane boom)|
+(DELIVERY T)|
+(dhl t)|
+(dilevery t)|
+(DRILL RIG)|
+(dp)|
+(Dump	)|
+(dump)|
+(DUMP)|
+(dump truck)|
+(Dump truck)|
+(DUMP TRUCK)|
+(dumps)|
+(Dumps)|
+(DUMPS)|
+(DUMPT)|
+(E ONE)|
+(escavator)|
+(EXCAV)|
+(Excavator)|
+(Farm Vehicle)|
+(FREIGHTLIN)|
+(FR`)|
+(FREIG)|
+(FREIGHT TR)|
+(FRHT)|
+(FRIEG)|
+(Front-Load)|
+(FRONT)|
+(FUEL)|
+(garba)|
+(Garba)|
+(GARBA)|
+(Garbage or Refuse)|
+(GARBAGE TR)|
+(Grain)|
+(HEAVY)|
+(HINO)|
+(Hopper)|
+(KENWO)|
+(LARGE COM VEH(6 OR MORE TIRES))|
+(LIEBH)|
+(MAC T)|
+(mack)|
+(Mack)|
+(MACK)|
+(Mack Truck)|
+(MACK TRUCK)|
+(work truck)|
+(Well Driller)|
+(UHUAL)|
+(UHAL)|
+(U-HAU)|
+(U_HAL)|
+(U HAUL TRU)|
+(U HAU)|
+(TRUCK COMM)|
+(TRUCK)|
+(TRK)|
+(Tram)|
+(Tractor Truck Diesel)|
+(Tractor Truck Gasoline)|
+(Tractor tr)|
+(Tractor)|
+(Tract)|
+(Track Exca)|
+(TRAC.)|
+(TRAC)|
+(tr)|
+(toter)|
+(towtr)|
+(tow truck / wrecker)|
+(tow t)|
+(tow)|
+(tl)|
+(tl tr)|
+(tktr)|
+(tk)|
+(tir)|
+(tanker)|
+(tanke)|
+(tank)|
+(stake or rack)|
+(stake)|
+(snow plow)|
+(snow)|
+(skid loade)|
+(shove)|
+(sgws)|
+(semi-)|
+(semi)|
+(sanitaton)|
+(SANITATION)|
+(Sanitation)|
+(sanitaion)|
+(SANIT)|
+(ROAD SWEEP)|
+(rescu)|
+(Quality tr)|
+(power shov)|
+(parce)|
+(NYC SANITA)|
+(NT TR)|
+(MOVING TRU)
+
+
+Public
+(bus)|
+(Bus)|
+(BUS)|
+(CAB)|
+(Livery Bus	)|
+(MTA BUS)|
+(MTA B)|
+(MTA)|
+(MTA V)|
+(MTA U)|
+(MTA C)|
+(school bus )|
+(school bu)|
+(schoo)|
+(shuttle bu)
+	
+Commercial
+(^CO$)|
+(^com$)|
+(^COM$)|
+(^com v$)|
+(^COMER$)|
+(^comm$)|
+(^COMM$)|
+(^comme$)|
+(^Comme$)|
+(^COMME$)|
+(^commercial$)|
+(^Commercial$)|
+(^COMMERCIAL$)|
+(^commerical$)|
+(^FLEET$)|
+(^COMMM$)|
+(^COMMU$)|
+(^CAB$)|
+(^CABIN$)|
+(^DEIV$)|
+(^del$)|
+(^deliv$)|
+(^Deliv$)|
+(^DELIV$)|
+(^Delivery$)|
+(^DELIVERY$)|
+(^delv$)|
+(^Delv$)|
+(^DELV$)|
+(^DELVI$)|
+(^delviery$)|
+(^FED E$)|
+(^Fedex$)|
+(^FEDEX$)|
+(^fedx$)|
+(^Grumman LL$)|
+(^GRUMM$)|
+(^mail$)|
+(^Mail$)|
+(^MAIL$)|
+(^MAIL TRUCK$)|
+(^taxi$)|
+(^USPS2$)|
+(^USPS/GOVT$)|
+(^USPS TRUCK$)|
+(^USPS POSTA$)|
+(^USPS MAIL$)|
+(^USPS #7530$)|
+(^USPS # 487 $)|
+(^USPS$)|
+(^USPOS$)|
+(^USP M$)|
+(^US POSTAL$)|
+(^US PO$)|
+(^US Mail Tr$)|
+(^US MA$)|
+(^UPS TRUCK$)|
+(^UPS T$)|
+(^UPS M$)|
+(^UPS$)|
+(^POSTAL TRU$)|
+(^postal ser$)|
+(^postal bus$)|
+(^posta$)|
+(^post offic$)|
+(^U.S. POSTA$)
+
+Van/PiKA
+(cater)|
+(CATER)|
+(Chassis Cab)|
+(DEPT VAN #)|
+(couri	)|
+(COURI)|
+(Courier	)|
+(DODGE RAM)|
+(E450)|
+(ECONOLINE)|
+(ECONO)|
+(F550)|
+(flat)|
+(Flat)|
+(FLAT)|
+(FLAT  BED)|
+(Flat Bed)|
+(Flat Rack)|
+(FLAT-)|
+(FLAT/)|
+(flatb)|
+(Flatb)|
+(FLATB)|
+(FLATBED)|
+(FLATBED FR)|
+(Food)|
+(food)|
+(FOOD)|
+(food truck)|
+(ford van)|
+(Ford Van)|
+(FORD VAN)|
+(Glass Rack)|
+(HERTZ RAM)|
+(jeep)|
+(Livestock Rack)|
+(Lunch Wagon)|
+(MARKED VAN)|
+(MAXIM)|
+(Mini	)|
+(MINI)|
+(MINI BUS)|
+(mini van)|
+(Mini Van)|
+()|
+(UTILITY WH)|
+(UTILITY VE)|
+(WORKH)|
+(WORK VAN)|
+(wagon)|
+(station wagon)|
+(Vanette)|
+(VAN/TRUCK)|
+(VAN/T)|
+(VAN/B)|
+(Van W)|
+(VAN T)|
+(VAN E)|
+(Van Camper)|
+(VAN)|
+(UTILITY VA)|
+(utility)|
+(UTILI)|
+(UTLIT)|
+(UTIL)|
+(UT)|
+(Unmarked V)|
+(TRUCK VAN)|
+(TRALI)|
+(street swe)|
+(street cle)|
+(stree)|
+(Sprinter v)|
+(sprin)|
+(SPORT UTILITY / STATION WAGON)|
+(RV/VAN)|
+(refrigerated Van)|
+(refri)|
+(refg)|
+(refr)|
+(Ram Promas)|
+(ram)|
+(pumper)|
+(PUMP )|
+(PU)|
+(pro moaster)|
+(prks)|
+(POSTAL VEH)|
+(postal van)|
+(plow)|
+(PK)|
+(Pickup with mounted Camper)|
+(PICKUP TRU)|
+(PICKUP)|
+(PICKU)|
+(PICK-UP TRUCK)|
+(pick-)|
+(pick wh)|
+(pick up tr)|
+(pick up)|
+(pick)|
+(pay loader)|
+(PAS V)|
+(OMNIB)|
+(omni)|
+(NYPD VAN)|
+(NYPD)|
+(MOVING VAN)|
+(MINIV)|
+(R/V C)|
+(R/V)|
+(r/v)|
+(RV/TR)|
+(rv)
+
+Ambulance
+(ABULA)|
+(amb)|
+(Amb)|
+(AMB)|
+(ambu)|
+(Ambu)|
+(AMBU)|
+(ambul)|
+(Ambul)|
+(AMbul)|
+(AMBUL)|
+(AMBULACE)|
+(ambulance)|
+(Ambulance)|
+(AMBULANCE)|
+(AMBULANE)|
+(AMBULENCE)|
+(Ambulette)|
+(amulance)|
+(E.M.S)|
+(EMERGENCY)|
+(EMRGN)|
+(EMS)|
+(EMS Ambula)|
+(EMS A)|
+(EMS bus)|
+(EMS T)|
+(ESU RESCUE)|
+(ESU T)|
+(fdny ambul)|
+(Fdny ambul)|
+(FDNY Ambul)|
+(FDNY AMBUL)|
+(fdny ems)|
+(FDNY EMS)|
+(FDNY EMS V)|
+(FDNY Engin)|
+(FDNY ENGIN)|
+(GEN  AMBUL)|
+(G AMB)|
+(white ambu)|
+(NYS AMBULA)|
+(NYS A)|
+(nyc EMS)|
+(Fd fi)|
+(fd tr)|
+(FD tr)|
+(FD TR)|
+(fdny)|
+(FDNY	)|
+(FDNY #226)|
+(FDNY fire)|
+(FDNY Fire)|
+(FDNY FIRE)|
+(FDNY Firet)|
+(FDNY FIRET)|
+(FDNY LADDE)|
+(fdny truck)|
+(FDNY Truck)|
+(FDNY TRUCK)|
+(fire)|
+(Fire)|
+(FIRE)|
+(Fire Engin)|
+(FIRE ENGIN)|
+(fire truck)|
+(Fire truck)|
+(Fire Truck)|
+(FIRE TRUCK)|
+(FIRER)|
+(firet)|
+(Firet)|
+(firetruck)|
+(Firetruck)|
+(FIRETRUCK)|
+(FIRTRUCK)|
+(KME/F)|
+(ladde)|
+(LADDER 34	)|
+(LADDER TRU)|
+(nyfd)|
+(NYC FD)|
+(NYC F)
+
+Special
+(bobca)|
+(BOBCA)|
+(Bobcat)|
+(BOBCAT FOR)|
+(bobct)|
+(dirt)|
+(DIRT)|
+(Dirt Bike)|
+(DIRT BIKE)|
+(dirtb)|
+(DIRTB)|
+(fork)|
+(Fork)|
+(FORK)|
+(Fork lift)|
+(Fork Lift)|
+(FORK LIFT)|
+(FORK-)|
+(forkl)|
+(Forkl)|
+(FORKL)|
+(forklift)|
+(Forklift)|
+(FORKLIFT)|
+(forlift)|
+(GATOR)|
+(Go kart)|
+(gokar)|
+(golf)|
+(Golf)|
+(GOLF)|
+(GOLF CART)|
+(ice c)|
+(ICE C)|
+(icecr)|
+(JOHN DEERE)|
+(KUBOT)|
+(Lift Boom)|
+	
+Sedan
+(2 DOO)|
+(2 DR)|
+(2 dr sedan)|
+(3 doo)|
+(3-Door)|
+(2 Whe)|
+(2 WHE)|
+(3DOOR)|
+(4 dr sedan)|
+(4 RUN)|
+(4D)|
+(4DR)|
+(4DS)|
+(4dsd)|
+(4whee)|
+(Acces *)|
+(ACCES *)|
+(Barri)|
+(box)|
+(BOX)|
+(BOX H)|
+(CHERV)|
+(CHEVR)|
+(CHEVROLET)|
+(CHEVY EXPR)|
+(Convertible * (fast))|
+(COUPE)|
+(cross		)|
+(dodge)|
+(DODGE	)|
+(Dodge)|
+(ELEC.)|
+(elect)|
+(Elect)|
+(ELECT)|
+(ELECTRIC S)|
+(ford)|
+(Ford)|
+(FORD)|
+(ford econo)|
+(Ford sprin)|
+(FORD SPRIN)|
+(FUSION)|
+(Hearse)|
+(limo)|
+(LIMOU	)|
+(LIMO)|
+(Mercedes)|
+(yy)|
+(YW PO)|
+(YELLOWPOWE)|
+(Wh Ford co)|
+(VMS)|
+(vespa)|
+(veriz)|
+(VAV)|
+(trans)|
+(tlr)|
+(tlc)|
+(tf)|
+(SYBN)|
+(SWT)|
+(sweep)|
+(sw)|
+(suv)|
+(SUBURBAN)|
+(SUBUR)|
+(SUBR)|
+(SUBN - AMB)|
+(ST150)|
+(st)|
+(smart car)|
+(smart)|
+(small com veh(4 tires))|
+(small)|
+(sm yw)|
+(slingshot)|
+(skid-)|
+(sedona)|
+(sedan)|
+(sea)|
+(se)|
+(sd)|
+(scomm)|
+(scom)|
+(SANTI)|
+(rmb)|
+(RINGO)|
+(rgs)|
+(RD/S)|
+(range)|
+(priva)|
+(power ladd)|
+(power)|
+(POSTO)|
+(police rep)|
+(POLIC)|
+(perm)|
+(pedicab)|
+(pedic)|
+(pc)|
+(passenger vehicle)|
+(passenger)|
+(passe)|
+(passa)|
+(pass)|
+(pas)|
+(Open Body)|
+(OMT/T)|
+(OMT)|
+(OMR)|
+(OML/OMNIBU)|
+(OML)|
+(OLC)|
+(nyu s)|
+(NISSA)
+
+Trail
+(^5X8 T$)|
+(^carri$)|
+(^Carry All$)|
+(^CART$)|
+(^Enclosed Body - Removable Enclosure$)|
+(^Enclosed Body - Nonremovable Enclosure$)|
+(^G TOW$)|
+(^HORSE CARR$)|
+(^Horse Trai$)|
+(^trailer$)|
+(^TRLR$)|
+(^TRL$)|
+(^trailee$)|
+(^TRATLER/FL$)|
+(^TR-Trailer$)|
+(^semi trail$)|
+(^Motorized Home$)|
+(^MOTOR HOME$)|
+(^UTILITY TR$)
+
+Motor
+(50cc Scoot)|
+(atv p (heavy))|
+(gas mo ped)|
+(GAS POWERE)|
+(gas scoote)|
+(Gas scoote)|
+(Yamaha)|
+(SPARK150 S)|
+(servi)|
+(Pavin)|
+(motorscooter)|
+(motorscoot)|
+(motorcycle)|
+(motorbike)|
+(motor scoo)|
+(motor)|
+(moped)|
+(mopd)|
+(mopad)|
+(MO PE)|
+(Mo pa)|
+(Minicycle)|
+(Minibike)
+
+Bike
+(2 WHE)|
+(Bicyc)|
+(BICYCLE)|
+(Bike)|
+(BK)|
+(E BIK)|
+(E bike)|
+(E REVEL SC)|
+(e sco)|
+(E SCO)|
+(E scooter)|
+(e-bik)|
+(E-Bik)|
+(E-bike)|
+(E-Bike)|
+(E-BIKE)|
+(E-MOT)|
+(E-Sco)|
+(E-scooter	)|
+(E-Scooter)|
+(E-UNICYCLE)|
+(ebike)|
+(Ebike)|
+(EBIKE)|
+(ELECTRIC B)|
+(ELEC. UNIC)|
+(kick scoot)|
+(segwa)|
+(scooter)|
+(scooter GA)|
+(scoot)|
+(scoo)|
+(PUSH SCOOT)|
+(pallet)|

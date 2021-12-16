@@ -147,6 +147,21 @@ accident <- accident %>%
     )
 ```
 
+```{r Vehicle Match}
+source("vehicle_match.R")
+accident3 <- accident %>%
+    mutate(
+        vehicle = match_vehicle(
+            `CONTRIBUTING FACTOR VEHICLE 1`
+        )
+    )
+
+
+write_csv(accident3, "accident_transform.csv")
+
+```
+
+
 ```{r}
 
 require(stringi)

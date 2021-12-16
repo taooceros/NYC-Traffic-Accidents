@@ -291,7 +291,7 @@ match_vehicle <- function(originVehicle) {
 (CHERV)|
 (CHEVR)|
 (CHEVY EXPR)|
-(Convertible * (fast))|
+(Convertible)|
 (COUPE)|
 (cross)|
 (dodge)|
@@ -381,7 +381,9 @@ match_vehicle <- function(originVehicle) {
 (^semi trail$)|
 (^Motorized Home$)|
 (^MOTOR HOME$)|
-(^UTILITY TR$)", "\n")
+(^UTILITY TR$)|
+(light trai)|
+", "\n")
 
     motor_match <- str_remove_all("(?i)
 (50cc Scoot)|
@@ -522,7 +524,6 @@ match_vehicle <- function(originVehicle) {
 (inter)|
 (kp160)|
 (left)|
-(light trai	)|
 (light)|
 (liver)|
 (livery vehicle)|

@@ -550,7 +550,7 @@ accidents_full %>%
 ```{r model}
 
 af <- accidents_full %>%
-    select(Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`) %>%
+    select(Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`, `LONGITUDE`, `LATITUDE`) %>%
     drop_na()
 set.seed(123)
 rows <- sample(nrow(af)) # Randomly reorder the row of the dataset.
@@ -585,7 +585,8 @@ accident_injury <- accident %>%
 
 samples <- sample(nrow(accident_injury), 150000)
 
-accident[samples, ] %>%
+train_df[samples, ] %>%
+    filter(`LONGITUDE` != 0 & `LATITUDE` != 0) %>%
     ggplot() +
     geom_point(
         aes(

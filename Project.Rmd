@@ -5,6 +5,8 @@ library(lubridate)
 
 ```{r, read_data, cache=TRUE}
 
+set.seed(203741092)
+
 accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv")
 weather12_14 <- read_csv("noaa12_14.csv")
 weather15_17 <- read_csv("noaa15_17.csv")
@@ -49,27 +51,7 @@ t.test(
 )
 ```
 
-```{r accident location mean}
 
-accident <- accident %>%
-    drop_na(`BOROUGH`, `LONGITUDE`, `LATITUDE`) %>%
-    filter(LONGITUDE != 0 & LATITUDE != 0)
-
-accident_injury <- accident %>%
-    filter(`NUMBER OF PERSONS INJURED` > 0)
-
-samples <- sample(nrow(accident_injury), 50000)
-
-accident[samples, ] %>%
-    ggplot() +
-    geom_point(
-        aes(
-            x = `LATITUDE`, y = `LONGITUDE`, size = (`NUMBER OF PERSONS INJURED` + 1) / 10,
-            color = `NUMBER OF PERSONS INJURED` > 0
-        ),
-        alpha = 0.1
-    )
-```
 
 ```{r test accuracy}
 data <- mtcars
@@ -135,6 +117,7 @@ collisions_location <- accident %>%
     filter(year %in% c(2019, 2020, 2021))
 collisions_location
 ```
+
 
 # ```{r, include=F}
 # ggplot(collisions_location, aes(x = LATITUDE, y = LONGITUDE)) +
@@ -566,27 +549,92 @@ accidents_full %>%
 
 ```{r model}
 
-af<-accidents_full%>%select(Foggy, Smoke,Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN,`CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW , Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`)%>%drop_na()
+af <- accidents_full %>%
+    select(Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`) %>%
+    drop_na()
 set.seed(123)
-rows = sample(nrow(af))#Randomly reorder the row of the dataset.
-train_num = as.integer(length(rows)*0.8)#Separating the dataset to two parts, one for training the model, and the other for testing the model.
-test_num = train_num+1
-len <- nrow(af%>%drop_na())
-train_df<-af[rows,][1:train_num,]
-test_df<-af[rows,][test_num:len,]
+rows <- sample(nrow(af)) # Randomly reorder the row of the dataset.
+train_num <- as.integer(length(rows) * 0.8) # Separating the dataset to two parts, one for training the model, and the other for testing the model.
+test_num <- train_num + 1
+len <- nrow(af %>% drop_na())
+train_df <- af[rows, ][1:train_num, ]
+test_df <- af[rows, ][test_num:len, ]
 
 
 lm_1 <- lm(
-    `NUMBER OF PERSONS INJURED` ~ Foggy+ Smoke+Heavy.Fog+Foggy*Heavy.Fog+ `VEHICLE TYPE CODE 1`+TMAX+ TMIN+`CONTRIBUTING FACTOR VEHICLE 1`+ PRCP+ SNOW+ Ice.Fog+ DayLight+`BOROUGH`+ `LOCATION_SPLIT`+ `CROSS STREET`,
+    `NUMBER OF PERSONS INJURED` ~ Foggy + Smoke + Heavy.Fog + Foggy * Heavy.Fog + `VEHICLE TYPE CODE 1` + TMAX + TMIN + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + Ice.Fog + DayLight + `BOROUGH` + `LOCATION_SPLIT` + `CROSS STREET`,
     data = (train_df)
 )
 
-test_df<-test_df%>%mutate(status=case_when(`NUMBER OF PERSONS INJURED`>0~1, TRUE~0))
+test_df <- test_df %>% mutate(status = case_when(`NUMBER OF PERSONS INJURED` > 0 ~ 1, TRUE ~ 0))
 
-probabilities <- predict(lm_1, type='response', newdata =test_df )
-predictions <- ifelse(probabilities>0.5, 1, 0)
-sum(predictions== test_df$status)/nrow(test_df)
-sum(test_df$status==0)/nrow(test_df)
+probabilities <- predict(lm_1, type = "response", newdata = test_df)
+predictions <- ifelse(probabilities > 0.5, 1, 0)
+sum(predictions == test_df$status) / nrow(test_df)
+sum(test_df$status == 0) / nrow(test_df)
+```
+
+```{r accident location mean}
+
+accident <- accident %>%
+    drop_na(`BOROUGH`, `LONGITUDE`, `LATITUDE`) %>%
+    filter(LONGITUDE != 0 & LATITUDE != 0)
+
+accident_injury <- accident %>%
+    filter(`NUMBER OF PERSONS INJURED` > 0)
+
+samples <- sample(nrow(accident_injury), 150000)
+
+accident[samples, ] %>%
+    ggplot() +
+    geom_point(
+        aes(
+            x = `LATITUDE`, y = `LONGITUDE`, size = (`NUMBER OF PERSONS INJURED`^3) / 10,
+            color = `NUMBER OF PERSONS INJURED` > 0
+        ),
+        alpha = 0.1
+    )
+```
+
+```{r randomForest}
+library(randomForest)
+
+af2 <- accidents_full %>%
+    select(Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, TMAX, TMIN, `CONTRIBUTING FACTOR VEHICLE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, `CROSS STREET`, `NUMBER OF PERSONS INJURED`, `LATITUDE`, `LONGITUDE`) %>%
+    drop_na()
+
+sampleIndex <- sample(nrow(af), 25000)
+
+af2 <- af2 %>%
+    rename(
+        `vehicle_type_code_1` = `VEHICLE TYPE CODE 1`,
+        `contributing_factor_vehicle_1` = `CONTRIBUTING FACTOR VEHICLE 1`,
+        `cross` = `CROSS STREET`
+    )
+
+r1 <- randomForest(
+    as.factor(`NUMBER OF PERSONS INJURED` > 0) ~ LATITUDE + LONGITUDE,
+    mtry = 1,
+    data = af2,
+    subset = sampleIndex,
+    ntree = 1000
+)
+
+
+sample2Index <- sample(nrow(af2), 50000)
+
+injury_position2 <- predict(r1, newdata = af2[sample2Index, ], type = "response")
+
+tibble(
+    mark = injury_position2,
+    LONGITUDE = af2[sample2Index, ]$LONGITUDE,
+    LATITUDE = af2[sample2Index, ]$LATITUDE
+) %>%
+    ggplot(aes(x = `LATITUDE`, y = `LONGITUDE`, color = mark)) +
+    geom_point(aes(
+        alpha =
+            ifelse(mark == "TRUE", 0.5, 0.1)
+    ))
 ```
 
 ```{r}
@@ -602,13 +650,17 @@ lm1 <- lm(
 )
 
 lm2 <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Smoke + `VEHICLE TYPE CODE 1` + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight + `BOROUGH`,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Smoke +
+        `VEHICLE TYPE CODE 1` + `CONTRIBUTING FACTOR VEHICLE 1` +
+        PRCP + SNOW + DayLight + `BOROUGH`,
     data = trainingAndTestingSet[[1]],
     family = "binomial"
 )
 
 lm3 <- glm(
-    `NUMBER OF PERSONS INJURED` ~ Foggy + Smoke + `VEHICLE TYPE CODE 1` + `CONTRIBUTING FACTOR VEHICLE 1` + PRCP + SNOW + DayLight + `BOROUGH` + `LOCATION_SPLIT`,
+    `NUMBER OF PERSONS INJURED` ~ Foggy + Smoke +
+        `VEHICLE TYPE CODE 1` + `CONTRIBUTING FACTOR VEHICLE 1` +
+        PRCP + SNOW + DayLight + `BOROUGH` + `LOCATION_SPLIT`,
     data = (
         ((trainingAndTestingSet[[1]] %>%
             drop_na(

@@ -1,14 +1,17 @@
 let vehicle = (dataframe open Motor_Vehicle_Collisions_-_Crashes.csv)
 
-filterVehicle ($vehicle | dataframe select "VEHICLE TYPE CODE 1") "1"
-filterVehicle ($vehicle | dataframe select "VEHICLE TYPE CODE 2") "2"
-filterVehicle ($vehicle | dataframe select "VEHICLE TYPE CODE 3") "3"
-filterVehicle ($vehicle | dataframe select "VEHICLE TYPE CODE 4") "4"
-filterVehicle ($vehicle | dataframe select "VEHICLE TYPE CODE 5") "5"
+filterVehicle ($vehicle) "1"
+filterVehicle ($vehicle) "2"
+filterVehicle ($vehicle) "3"
+filterVehicle ($vehicle) "4"
+filterVehicle ($vehicle) "5"
 
 
 # Documentation for filterVehicle
-def filterVehicle [df, name] {
+def filterVehicle [df_origin, name] {
+
+    let $df = ($df_origin | dataframe column "VEHICLE TYPE CODE 1")
+
     $df | dataframe is-not-null | dataframe aggregate sum
 
     # Write some code here
@@ -69,7 +72,6 @@ def filterVehicle [df, name] {
         dataframe set "Truck" --mask $truck |
         dataframe set "Unknown" --mask $unknown2)
 
-
-    $new | dataframe to-csv $"truck_type-($name).csv"
+    $df_origin | dataframe column "COLLISION_ID" | dataframe with-column $new --name  "type" | dataframe to-csv $"truck_type-($name).csv"
 
 }

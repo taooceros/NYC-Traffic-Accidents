@@ -172,15 +172,7 @@ accidents <- accident %>%
         )
     )
 ```
-1. 40.788193, -73.937672
-2. 40.778374, -73.860884
-3. 40.711646, -73.976068
-4. 40.712806, -73.827198
 
-1. 40.778374, -73.937672
-2. 40.778374, -73.860884
-3. 40.712806, -73.976068
-4. 40.712806, -73.827198
 
 ```{r Location Separation}
 
@@ -373,7 +365,14 @@ accidents_full <- accidents_full %>%
                  (factor_type3 %in% c("Drug", "Fatigue")) |
                  (factor_type4 %in% c("Drug", "Fatigue")) |
                  (factor_type5 %in% c("Drug", "Fatigue"))
-        ))%>%
+        ),
+        crazy_driver = (
+            factor_type1 == "Crazy Driver" |
+                factor_type2 == "Crazy Driver" |
+                factor_type3 == "Crazy Driver" |
+                factor_type4 == "Crazy Driver" |
+                factor_type5 == "Crazy Driver" )
+        )%>%
     mutate(
         at_crossing = !is.na(`CROSS STREET`)
     )
@@ -399,7 +398,8 @@ af <- accidents_full %>%
         at_crossing,
         two_wheel_involved,
         truck_involved,
-        starts_with("type")
+        unconcious_driver,
+        crazy_driver
     ) %>%
     drop_na()
 set.seed(123)
@@ -490,7 +490,7 @@ test.accuracy <- function(model, test_df) {
 }
 
 full.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Smoke + Heavy.Fog + Ice.Fog + PRCP + SNOW + Ice.Fog + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Smoke + Heavy.Fog + Ice.Fog + PRCP + SNOW + Ice.Fog + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver,
     data = (train_df),
     family = "binomial"
 )
@@ -504,7 +504,7 @@ test.accuracy(full.model, test_df)
 
 ```{r Model Selection}
 
-# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved
+# Foggy + Smoke + Heavy.Fog + Ice.Fog + PRCP + SNOW + Ice.Fog + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 step1a.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ Foggy,

@@ -16,19 +16,39 @@ truck_type4 <- read_csv("truck_type-4.csv") %>%
     rename(type4 = type)
 truck_type5 <- read_csv("truck_type-5.csv") %>%
     rename(type5 = type)
+factor1 <- read_csv("factor-1.csv") %>%
+    rename(factor_type1 = factor_type)
+factor2 <- read_csv("factor-2.csv") %>%
+    rename(factor_type2 = factor_type)
+factor3 <- read_csv("factor-3.csv") %>%
+    rename(factor_type3 = factor_type)
+factor4 <- read_csv("factor-4.csv") %>%
+    rename(factor_type4 = factor_type)
+factor5 <- read_csv("factor-5.csv") %>%
+    rename(factor_type5 = factor_type)
 accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv") %>%
     left_join(truck_type1, by = "COLLISION_ID") %>%
     left_join(truck_type2, by = "COLLISION_ID") %>%
     left_join(truck_type3, by = "COLLISION_ID") %>%
     left_join(truck_type4, by = "COLLISION_ID") %>%
     left_join(truck_type5, by = "COLLISION_ID") %>%
-    select(-c(`VEHICLE TYPE CODE 1`, `VEHICLE TYPE CODE 2`, `VEHICLE TYPE CODE 3`, `VEHICLE TYPE CODE 4`, `VEHICLE TYPE CODE 5`)) %>%
+    left_join(factor1, by = "COLLISION_ID") %>%
+    left_join(factor2, by = "COLLISION_ID") %>%
+    left_join(factor3, by = "COLLISION_ID") %>%
+    left_join(factor4, by = "COLLISION_ID") %>%
+    left_join(factor5, by = "COLLISION_ID") %>%
+    select(-c(`VEHICLE TYPE CODE 1`, `VEHICLE TYPE CODE 2`, `VEHICLE TYPE CODE 3`, `VEHICLE TYPE CODE 4`, `VEHICLE TYPE CODE 5`, `CONTRIBUTING FACTOR VEHICLE 1`, `CONTRIBUTING FACTOR VEHICLE 2`, `CONTRIBUTING FACTOR VEHICLE 3`, `CONTRIBUTING FACTOR VEHICLE 4`, `CONTRIBUTING FACTOR VEHICLE 5`)) %>%
     rename(
         `VEHICLE TYPE CODE 1` = type1,
         `VEHICLE TYPE CODE 2` = type2,
         `VEHICLE TYPE CODE 3` = type3,
         `VEHICLE TYPE CODE 4` = type4,
-        `VEHICLE TYPE CODE 5` = type5
+        `VEHICLE TYPE CODE 5` = type5,
+        `CONTRIBUTING FACTOR VEHICLE 1` = factor_type1,
+        `CONTRIBUTING FACTOR VEHICLE 2` = factor_type2,
+        `CONTRIBUTING FACTOR VEHICLE 3` = factor_type3,
+        `CONTRIBUTING FACTOR VEHICLE 4` = factor_type4,
+        `CONTRIBUTING FACTOR VEHICLE 5` = factor_type5
     )
 
 weather12_14 <- read_csv("noaa12_14.csv")
@@ -402,7 +422,7 @@ accidents_full <- accidents_full %>%
 ```{r model}
 # seperate trainning data and testing data
 af <- accidents_full %>%
-    select(`NUMBER OF PERSONS INJURED`,`LONGITUDE`, `LATITUDE`, Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, at_crossing, two_wheel_involved, truck_involved) %>%
+    select(`NUMBER OF PERSONS INJURED`, `LONGITUDE`, `LATITUDE`, Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, at_crossing, two_wheel_involved, truck_involved) %>%
     drop_na()
 set.seed(123)
 
@@ -443,7 +463,7 @@ train_df[samples, ] %>%
     geom_point(
         aes(
             x = `LATITUDE`, y = `LONGITUDE`,
-            color = 
+            color =
                 (
                     LATITUDE > 40.64 & LATITUDE < 40.68 &
                         LONGITUDE > -73.965 & LONGITUDE < -73.89
@@ -463,7 +483,7 @@ train_df[samples, ] %>%
         ),
         alpha = 0.006
     ) +
-    labs(color="Serious Area")
+    labs(color = "Serious Area")
 ```
 
 ```{r Model Selection (Step)}
@@ -943,6 +963,32 @@ round6 <- round5 %>%
 round6 %>%
     arrange(aic_round6)
 
+```{r serious accident location}
+
+selector <- function(LATITUDE, LONGITUDE) {
+    (
+        LATITUDE > 40.64 & LATITUDE < 40.68 &
+            LONGITUDE > -73.965 & LONGITUDE < -73.89
+    ) | (
+        LATITUDE > 40.68 & LATITUDE < 40.77 &
+            LONGITUDE > -74.02 & LONGITUDE < -73.955
+    ) | (
+        LATITUDE > 40.79 & LATITUDE < 40.825 &
+            LONGITUDE > -74.059 & LONGITUDE < -73.885
+    ) | (
+        LATITUDE > 40.695 & LATITUDE < 40.72 &
+            LONGITUDE > -73.96 & LONGITUDE < -73.935
+    ) | (
+        LATITUDE > 40.847 & LATITUDE < 40.865 &
+            LONGITUDE > -73.91 & LONGITUDE < -73.89
+    )
+}
+
+train_df <- train_df %>%
+    mutate(
+        serious = selector(`LATITUDE`, `LONGITUDE`)
+    )
+    
 ```
 
 

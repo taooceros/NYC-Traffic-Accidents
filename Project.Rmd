@@ -368,12 +368,12 @@ accidents_full <- accidents_full %>%
                 (`VEHICLE TYPE CODE 5` %in% c("Bike", "Motor"))
         ),
         unconcious_driver = (
-            (factor_type1 %in% c("Drug", "Fatigue") |
-                 (factor_type2 %in% c("Drug", "Fatigue") |
-                 (factor_type3 %in% c("Drug", "Fatigue") |
-                 (factor_type4 %in% c("Drug", "Fatigue") |
-                 (factor_type5 %in% c("Drug", "Fatigue") )
-        )%>%
+            (factor_type1 %in% c("Drug", "Fatigue")) |
+                 (factor_type2 %in% c("Drug", "Fatigue")) |
+                 (factor_type3 %in% c("Drug", "Fatigue")) |
+                 (factor_type4 %in% c("Drug", "Fatigue")) |
+                 (factor_type5 %in% c("Drug", "Fatigue"))
+        ))%>%
     mutate(
         at_crossing = !is.na(`CROSS STREET`)
     )

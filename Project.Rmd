@@ -81,10 +81,6 @@ accidents_full <- accidents_full %>%
     )
 ```
 
-```{r visualization}
-source("visualization.r")
-```
-
 ```{r}
 accidents_full <- accidents_full %>%
     mutate(
@@ -170,6 +166,9 @@ train_df <- af[rows, ][1:train_num, ]
 test_df <- af[rows, ][test_num:len, ]
 ```
 
+```{r visualization}
+source("visualization.r")
+```
 
 ```{r sample & train, fig.height=10, fig.width=10}
 samples <- sample(nrow(train_df), 150000)
@@ -1391,18 +1390,25 @@ accident_c <- accidents_full %>%
     mutate(has.injury = ifelse((`NUMBER OF PERSONS INJURED` > 0 | `NUMBER OF PERSONS KILLED` > 0), 1, 0))
 
 accident_c <- accident_c %>% 
+    filter(has.injury == 1 & type1 != "Unknown") %>% 
     group_by(type1) %>% 
     count(has.injury) %>% 
-    drop_na()
+    drop_na() 
 
 
-condition <- rep(c(0, 1) , 11)
-type <- rep(accident_c$type1 %>% unique(), 2)
-ggplot(accident_c, aes(fill = as.factor(condition), y = n, x = type))+
-    geom_bar(position = position_dodge(), stat='identity') +
-    ylab("Count of accidents having injured persons") +
+# condition <- rep(c(0, 1) , 10)
+# type <- rep(accident_c$type1 %>% unique(), 2)
+# ggplot(accident_c, aes(fill = as.factor(condition), y = n, x = type))+
+#     geom_bar(position = position_dodge(), stat='identity') +
+#     ylab("Count of accidents having injured persons") +
+#     ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +
+#     guides(fill=guide_legend(title="Condition"))
+
+ggplot(accident_c, aes(x = type1, y = n))+
+    geom_col() +
+    ylab("Number of accidents") +
     ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +
-    guides(fill=guide_legend(title="Condition"))
+    xlab("Vehicle Type")
 ```
 
 

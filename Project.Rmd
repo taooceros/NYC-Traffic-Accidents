@@ -182,23 +182,23 @@ train_df[samples, ] %>%
             x = `LATITUDE`, y = `LONGITUDE`,
             color =
                 (
-                    LATITUDE > 40.64 & LATITUDE < 40.68 &
-                        LONGITUDE > -73.965 & LONGITUDE < -73.89
+                    LATITUDE > 40.67 & LATITUDE < 40.68 &
+                        LONGITUDE > -73.9 & LONGITUDE < -73.89
                 ) | (
-                    LATITUDE > 40.68 & LATITUDE < 40.77 &
-                        LONGITUDE > -74.02 & LONGITUDE < -73.955
+                    LATITUDE > 40.665 & LATITUDE < 40.68 &
+                        LONGITUDE > -73.925 & LONGITUDE < -73.97
                 ) | (
-                    LATITUDE > 40.79 & LATITUDE < 40.825 &
-                        LONGITUDE > -74.059 & LONGITUDE < -73.885
+                    LATITUDE > 40.715 & LATITUDE < 40.725 &
+                        LONGITUDE > -74 & LONGITUDE < -73.98
                 ) | (
-                    LATITUDE > 40.695 & LATITUDE < 40.72 &
-                        LONGITUDE > -73.96 & LONGITUDE < -73.935
+                    LATITUDE > 40.73 & LATITUDE < 40.75 &
+                        LONGITUDE > -73.99 & LONGITUDE < -73.97
                 ) | (
-                    LATITUDE > 40.847 & LATITUDE < 40.865 &
-                        LONGITUDE > -73.91 & LONGITUDE < -73.89
+                    LATITUDE > 40.8 & LATITUDE < 40.81 &
+                        LONGITUDE > -73.945 & LONGITUDE < -73.935
                 )
         ),
-        alpha = 0.1
+        alpha = 0.01
     ) +
     labs(color = "Serious Area") +
     theme(text = element_text(size = 10))
@@ -208,20 +208,26 @@ train_df[samples, ] %>%
 
 selector <- function(LATITUDE, LONGITUDE) {
     (
-        LATITUDE > 40.64 & LATITUDE < 40.68 &
-            LONGITUDE > -73.965 & LONGITUDE < -73.89
+        LATITUDE > 40.64 & LATITUDE < 40.65 &
+            LONGITUDE > -74.1 & LONGITUDE < -74.95
     ) | (
-        LATITUDE > 40.68 & LATITUDE < 40.77 &
-            LONGITUDE > -74.02 & LONGITUDE < -73.955
+        LATITUDE > 40.67 & LATITUDE < 40.68 &
+            LONGITUDE > -73.9 & LONGITUDE < -73.89
     ) | (
-        LATITUDE > 40.79 & LATITUDE < 40.825 &
-            LONGITUDE > -74.059 & LONGITUDE < -73.885
+        LATITUDE > 40.665 & LATITUDE < 40.68 &
+            LONGITUDE > -73.925 & LONGITUDE < -73.97
     ) | (
-        LATITUDE > 40.695 & LATITUDE < 40.72 &
-            LONGITUDE > -73.96 & LONGITUDE < -73.935
+        LATITUDE > 40.665 & LATITUDE < 40.67 &
+            LONGITUDE > -73.95 & LONGITUDE < -73.92
     ) | (
-        LATITUDE > 40.847 & LATITUDE < 40.865 &
-            LONGITUDE > -73.91 & LONGITUDE < -73.89
+        LATITUDE > 40.715 & LATITUDE < 40.725 &
+            LONGITUDE > -74 & LONGITUDE < -73.98
+    ) | (
+        LATITUDE > 40.73 & LATITUDE < 40.75 &
+            LONGITUDE > -73.99 & LONGITUDE < -73.97
+    ) | (
+        LATITUDE > 40.8 & LATITUDE < 40.81 &
+            LONGITUDE > -73.945 & LONGITUDE < -73.935
     )
 }
 
@@ -1332,11 +1338,11 @@ test.predict <- (tibble(injury = (predict(full.model,
 ) > 0.5)) %>% drop_na())$injury
 
 test.actual <- (
-    ((trainingAndTestingSet[[2]] %>%
+    ((test_df %>%
         drop_na(
             Foggy, Heavy.Fog, Smoke,
-            `VEHICLE TYPE CODE 1`,
-            `CONTRIBUTING FACTOR VEHICLE 1`,
+            starts_with("type"),
+            starts_with("factor"),
             PRCP, SNOW, DayLight
         ))
     ["NUMBER OF PERSONS INJURED"]) > 0)
@@ -1347,18 +1353,18 @@ quantile(accidents_full$`NUMBER OF PERSONS INJURED`, na.rm = T)
 
 
 tibble(
-    Type = c("Injury", "No Injury"),
-    Prediction = c(
-        (sum(test.predict, na.rm = T)),
-        (sum(!test.predict, na.rm = T))
+    Type = c("TRUE", "FALSE"),
+    `TRUE` = c(
+        (sum(test.predict & test.actual, na.rm = T)),
+        (sum(test.predict & !test.actual, na.rm = T))
     ),
-    Actual = c(
+    `FALSE` = c(
         sum(
-            test.actual,
+            !test.predict & test.actual,
             na.rm = T
         ),
         sum(
-            !test.actual,
+            !test.predict & !test.actual,
             na.rm = T
         )
     ),

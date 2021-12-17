@@ -1389,23 +1389,39 @@ accident_c <- accidents_full %>%
     group_by(type1) %>% 
     mutate(has.injury = ifelse((`NUMBER OF PERSONS INJURED` > 0 | `NUMBER OF PERSONS KILLED` > 0), 1, 0))
 
-accident_c <- accident_c %>% 
+accident_b <- accident_c %>% 
     group_by(type1) %>% 
     filter(type1 != "Unknown") %>% 
     count(has.injury) %>% 
-    drop_na()
+    drop_na() %>% 
+    summarize(n = sum(n)) %>% 
+    rename(total = n)
 
-t <- rowsum(accident_c$n,rep(1:10,each=2))
+accident_a <- accident_c %>% 
+    group_by(type1) %>% 
+    filter(type1 != "Unknown") %>% 
+    count(has.injury) %>% 
+    drop_na() %>% 
+    right_join(accident_b) %>% 
+    filter(has.injury == 1)
+
+accident_d <- accident_c %>% 
+    group_by(type1) %>% 
+    filter(type1 != "Unknown") %>% 
+    count(has.injury) %>% 
+    drop_na() %>% 
+    right_join(accident_b) %>% 
+    mutate(percentage = n/total)
 
 # condition <- rep(c(0, 1) , 10)
 # type <- rep(accident_c$type1 %>% unique(), 2)
-# ggplot(accident_c, aes(fill = as.factor(condition), y = n, x = type))+
+# ggplot(accident_c, aes(fill = as.factor(condition), y = percentage, x = type))+
 #     geom_bar(position = position_dodge(), stat='identity') +
 #     ylab("Count of accidents having injured persons") +
 #     ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +
 #     guides(fill=guide_legend(title="Condition"))
 
-ggplot(accident_c, aes(x = type1, y = n))+
+ggplot(accident_a, aes(x = type1, y = n/total))+
     geom_col() +
     ylab("Number of accidents") +
     ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +

@@ -26,6 +26,7 @@ factor4 <- read_csv("factor-4.csv") %>%
     rename(factor_type4 = factor_type)
 factor5 <- read_csv("factor-5.csv") %>%
     rename(factor_type5 = factor_type)
+
 accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv") %>%
     left_join(truck_type1, by = "COLLISION_ID") %>%
     left_join(truck_type2, by = "COLLISION_ID") %>%
@@ -37,8 +38,7 @@ accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv") %>%
     left_join(factor3, by = "COLLISION_ID") %>%
     left_join(factor4, by = "COLLISION_ID") %>%
     left_join(factor5, by = "COLLISION_ID") %>%
-    select(-c(`VEHICLE TYPE CODE 1`, `VEHICLE TYPE CODE 2`, `VEHICLE TYPE CODE 3`, `VEHICLE TYPE CODE 4`, `VEHICLE TYPE CODE 5`, `CONTRIBUTING FACTOR VEHICLE 1`, `CONTRIBUTING FACTOR VEHICLE 2`, `CONTRIBUTING FACTOR VEHICLE 3`, `CONTRIBUTING FACTOR VEHICLE 4`, `CONTRIBUTING FACTOR VEHICLE 5`)) %>%
-    rename(
+    mutate(
         `VEHICLE TYPE CODE 1` = type1,
         `VEHICLE TYPE CODE 2` = type2,
         `VEHICLE TYPE CODE 3` = type3,
@@ -60,7 +60,7 @@ weather12_21 <- weather12_14 %>%
 
 
 weather <- weather12_21 %>%
-    select(!c(STATION, NAME, ELEVATION)) %>%
+    select(-c(STATION, NAME, ELEVATION)) %>%
     arrange(DATE) %>%
     group_by(DATE) %>%
     summarise(across(AWND:WT22, ~ mean(as.numeric(.x), na.rm = TRUE))) %>%
@@ -92,35 +92,6 @@ t.test(
     (accident %>% filter(!is.na(`BOROUGH`)))$`NUMBER OF PERSONS INJURED`,
     (accident %>% filter(is.na(`BOROUGH`)))$`NUMBER OF PERSONS INJURED`
 )
-```
-
-
-
-```{r test accuracy}
-data <- mtcars
-trainingAndTesting <- function(dataFrame, ratio) {
-    dt <- sample(nrow(dataFrame), nrow(dataFrame) * ratio)
-    train <- dataFrame[dt, ]
-    test <- dataFrame[-dt, ]
-    result <- list(train, test)
-    return(result)
-}
-
-combined_set <- trainingAndTesting(data, ratio = 0.7)
-train <- combined_set[[1]]
-test <- combined_set[[2]]
-testAccuracy <- function(fit.model, test, var.index, result.index) {
-    num <- nrow(test)
-
-    errors <- rep(NA, num)
-    prediction <- predict(fit.model, newdata = test[var.index])
-
-    for (i in 1:num) {
-        errors[i] <- (prediction[i] - test[i, result.index])^2
-    }
-
-    return(mean(errors))
-}
 ```
 
 ```{r, data_cleaning, cache=TRUE}
@@ -905,7 +876,7 @@ round5 <- round4 %>%
 round5 %>%
     arrange(aic_round5)
 
-# round 5 (two_wheel_involved + truck_involved + at_crossing + DayLight + SNOW)
+# round 6 (two_wheel_involved + truck_involved + at_crossing + DayLight + SNOW)
 
 step6a.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + SNOW + Foggy,
@@ -962,6 +933,10 @@ round6 <- round5 %>%
 
 round6 %>%
     arrange(aic_round6)
+
+# round 7 ()
+
+```
 
 ```{r serious accident location}
 

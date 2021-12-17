@@ -37,6 +37,10 @@ def filterFactor [df_origin, name] {
     let majeure = ($df | 
         dataframe contains "(?i)(prescription medication)|(driver inexperience)|(view obstructed)")
 
+    let unspecified =  ($df | 
+        dataframe contains "(?i)(1)|(80)|(^$)")
+
+
     let new = ($df |
         dataframe set "Fatigue" --mask $fatigue |
         dataframe set "Pedestrian" --mask $pedestrian |
@@ -47,7 +51,8 @@ def filterFactor [df_origin, name] {
         dataframe set "Environment" --mask $environment |
         dataframe set "Phone Held" --mask $phone |
         dataframe set "Health" --mask $health |
-        dataframe set "Majeure" --mask $majeure)
+        dataframe set "Majeure" --mask $majeure|
+        dataframe set "Unspecified" --mask $unspecified)
         
     $df_origin | dataframe column "COLLISION_ID" | dataframe with-column $new --name "factor_type" | dataframe to-csv $"factor-($name).csv"
 }

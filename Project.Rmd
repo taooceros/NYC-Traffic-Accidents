@@ -402,7 +402,7 @@ accidents_full <- accidents_full %>%
 ```{r model}
 # seperate trainning data and testing data
 af <- accidents_full %>%
-    select(`NUMBER OF PERSONS INJURED`,`LONGITUDE`, `LATITUDE`, Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, at_crossing, two_wheel_involved, truck_involved) %>%
+    select(`NUMBER OF PERSONS INJURED`, `LONGITUDE`, `LATITUDE`, Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, at_crossing, two_wheel_involved, truck_involved) %>%
     drop_na()
 set.seed(123)
 
@@ -443,7 +443,7 @@ train_df[samples, ] %>%
     geom_point(
         aes(
             x = `LATITUDE`, y = `LONGITUDE`,
-            color = 
+            color =
                 (
                     LATITUDE > 40.64 & LATITUDE < 40.68 &
                         LONGITUDE > -73.965 & LONGITUDE < -73.89
@@ -463,8 +463,37 @@ train_df[samples, ] %>%
         ),
         alpha = 0.005
     ) +
-    labs(color="Serious Area")
+    labs(color = "Serious Area")
 ```
+
+```{r serious accident location}
+
+selector <- function(LATITUDE, LONGITUDE) {
+    (
+        LATITUDE > 40.64 & LATITUDE < 40.68 &
+            LONGITUDE > -73.965 & LONGITUDE < -73.89
+    ) | (
+        LATITUDE > 40.68 & LATITUDE < 40.77 &
+            LONGITUDE > -74.02 & LONGITUDE < -73.955
+    ) | (
+        LATITUDE > 40.79 & LATITUDE < 40.825 &
+            LONGITUDE > -74.059 & LONGITUDE < -73.885
+    ) | (
+        LATITUDE > 40.695 & LATITUDE < 40.72 &
+            LONGITUDE > -73.96 & LONGITUDE < -73.935
+    ) | (
+        LATITUDE > 40.847 & LATITUDE < 40.865 &
+            LONGITUDE > -73.91 & LONGITUDE < -73.89
+    )
+}
+
+train_df <- train_df %>%
+    mutate(
+        serious = selector(`LATITUDE`, `LONGITUDE`)
+    )
+    
+```
+
 
 ```{r randomForest}
 library(randomForest)

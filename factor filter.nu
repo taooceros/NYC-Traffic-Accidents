@@ -22,8 +22,11 @@ def filterFactor [df_origin, name] {
         dataframe contains "(?i)(alcohol)|(drug)"
         )
 
+    let crazy = ($df | 
+        dataframe contains "(?i)(unsafe speed)|(aggressive driving)|(traffic control disregarded)")
+
     let rule = ($df | 
-        dataframe contains "(?i)(failure to yield right)|(passing or lane usage improper)|(turning improperly)|(unsafe lane changing)|(traffic control disregarded)|(unsafe speed)|(aggressive driving)|(failure to keep right)|(aggressive driving/road rage)")
+        dataframe contains "(?i)(failure to yield right)|(passing or lane usage improper)|(turning improperly)|(unsafe lane changing)")
 
     let distraction = ($df | dataframe contains "(?i)(driver inattention\\/distraction)|(following too closely)|(backing unsafely)|(passing too closely)|(outside car distraction)|(distraction)|(eating or drinking)|(listening\\/using headphones)|(using on board navigation device)|(Electronic)|(Cell Phone.*hands-free)|(Headphones)")
 
@@ -46,6 +49,7 @@ def filterFactor [df_origin, name] {
         dataframe set "Pedestrian" --mask $pedestrian |
         dataframe set "V Defection" --mask $defection |
         dataframe set "Drug" --mask $drug |
+        dataframe set "Crazy Driver" --mask $crazy |
         dataframe set "Disobey Rule" --mask $rule |
         dataframe set "Distraction" --mask $distraction |
         dataframe set "Environment" --mask $environment |

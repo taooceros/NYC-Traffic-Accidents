@@ -49,5 +49,5 @@ def filterFactor [df_origin, name] {
         dataframe set "Health" --mask $health |
         dataframe set "Majeure" --mask $majeure)
         
-    $new | dataframe to-csv $"factor-($name).csv"
+    $df_origin | dataframe column "COLLISION_ID" | dataframe with-column $new --name "factor_type" | dataframe to-csv $"factor-($name).csv"
 }

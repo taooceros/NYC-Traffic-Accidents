@@ -5,80 +5,7 @@ library(lubridate)
 
 ```{r, read_data, cache=TRUE}
 
-set.seed(203741092)
-truck_type1 <- read_csv("truck_type-1.csv") %>%
-    rename(type1 = type)
-truck_type2 <- read_csv("truck_type-2.csv") %>%
-    rename(type2 = type)
-truck_type3 <- read_csv("truck_type-3.csv") %>%
-    rename(type3 = type)
-truck_type4 <- read_csv("truck_type-4.csv") %>%
-    rename(type4 = type)
-truck_type5 <- read_csv("truck_type-5.csv") %>%
-    rename(type5 = type)
-factor1 <- read_csv("factor-1.csv") %>%
-    rename(factor_type1 = factor_type)
-factor2 <- read_csv("factor-2.csv") %>%
-    rename(factor_type2 = factor_type)
-factor3 <- read_csv("factor-3.csv") %>%
-    rename(factor_type3 = factor_type)
-factor4 <- read_csv("factor-4.csv") %>%
-    rename(factor_type4 = factor_type)
-factor5 <- read_csv("factor-5.csv") %>%
-    rename(factor_type5 = factor_type)
-
-accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv")
-
-accident <- accident %>%
-    mutate(
-        type1 = truck_type1$type1,
-        type2 = truck_type2$type2,
-        type3 = truck_type3$type3,
-        type4 = truck_type4$type4,
-        type5 = truck_type5$type5,
-        factor_type1 = factor1$factor_type1,
-        factor_type2 = factor2$factor_type2,
-        factor_type3 = factor3$factor_type3,
-        factor_type4 = factor4$factor_type4,
-        factor_type5 = factor5$factor_type5,
-    )
-
-weather12_14 <- read_csv("noaa12_14.csv")
-weather15_17 <- read_csv("noaa15_17.csv")
-weather18_21 <- read_csv("noaa18_21.csv")
-weather12_21 <- weather12_14 %>%
-    add_row(weather15_17) %>%
-    add_row(weather18_21)
-
-
-weather <- weather12_21 %>%
-    select(-c(STATION, NAME, ELEVATION)) %>%
-    arrange(DATE) %>%
-    group_by(DATE) %>%
-    summarise(across(AWND:WT22, ~ mean(as.numeric(.x), na.rm = TRUE))) %>%
-    replace(is.na(.), 0) %>%
-    rename(
-        Foggy = WT01,
-        Heavy.Fog = WT02,
-        Ice.Fog = WT22,
-        Ground.Fog = WT21,
-        Mist = WT13,
-        Thunder = WT03,
-        Small.Hail = WT04,
-        Hail = WT05,
-        Rime = WT06,
-        Smoke = WT08,
-        Blowing.Snow = WT09,
-        Snow = WT18,
-        Tornado = WT10,
-        Damaging.Wind = WT11,
-        Drizzle = WT14,
-        Freezing.Drizzle = WT15,
-        Rain = WT16,
-        Unknown.Precipitation = WT19
-    )
-
-rm(weather12_14, weather15_17, weather18_21)
+source("data_load.r")
 ```
 
 ```{r na analysis}
@@ -88,24 +15,6 @@ t.test(
 )
 ```
 
-```{r, data_cleaning, cache=TRUE}
-accident <- accident %>%
-    mutate(
-        `CRASH DATE` = mdy(`CRASH DATE`)
-    )
-
-accident %>%
-    summarize(
-        `CRASH DATE min` = min(`CRASH DATE`),
-        `CRASH DATE max` = max(`CRASH DATE`)
-    )
-
-accident %>%
-    mutate(
-        `CRASH MONTH` = month(`CRASH DATE`),
-        `CRASH YEAR` = year(`CRASH DATE`)
-    )
-```
 
 
 ```{r Time Separation}
@@ -126,46 +35,7 @@ accident <- accident %>%
 
 
 ```{r Sunset, echo=FALSE, cache=TRUE}
-sunset <- read_csv("sunset1.csv")
-for (i in 2:12) {
-    sunset <- sunset %>% add_row(read_csv(paste0("sunset", i, ".csv")))
-}
-
-sunset <- sunset %>%
-    mutate(
-        Day = paste("2020", str_replace(Day, "^.*,", "")),
-        Date = ymd(Day),
-        month = month(Date),
-        day = day(Date)
-    )
-
-accidents <- accident %>%
-    mutate(
-        month = month(`CRASH DATE`),
-        day = day(`CRASH DATE`)
-    ) %>%
-    full_join(sunset, by = c("month", "day")) %>%
-    mutate(
-        hour = hour(`CRASH TIME`),
-        minute = minute(`CRASH TIME`),
-        Sunrise = hms(Sunrise),
-        Sunset = hms(Sunset)
-    ) %>%
-    mutate(
-        sunrise_hour = hour(Sunrise),
-        sunrise_minute = minutes(Sunrise),
-        sunset_hour = hour(Sunset),
-        sunset_minute = minute(Sunset)
-    ) %>%
-    mutate(
-        DayLight = ifelse(
-            (hour >= sunrise_hour & hour < sunset_hour) |
-                (hour == sunrise_hour & minute >= sunrise_minute) |
-                (hour == sunset_hour & minute <= sunset_minute),
-            1,
-            0
-        )
-    )
+source("load_sunset.r")
 ```
 
 
@@ -212,162 +82,40 @@ accidents_full <- accidents_full %>%
 ```
 
 ```{r visualization}
-accidents_full %>%
-    summarise(
-        `NoFog` = sum(ifelse((Foggy + Heavy.Fog + Smoke), 0, 1), na.rm = T) / n(),
-        Fog = sum(Foggy, na.rm = T) / n(),
-        HeavyFog = sum(Heavy.Fog, na.rm = T) / n(),
-        Smoke = sum(Smoke, na.rm = T) / n(),
-        IceFog = sum(Ice.Fog, na.rm = T) / n(),
-    ) %>%
-    pivot_longer(
-        everything(),
-        names_to = "Fog Type",
-        values_to = "Proportion"
-    ) %>%
-    ggplot() +
-    geom_col(aes(x = `Fog Type`, y = Proportion), fill = "steelblue") +
-    theme_bw() +
-    ggtitle("Proportion of Accidents by Fog Type")
-
-accidents_full %>%
-    filter(`NUMBER OF PERSONS INJURED` > 0) %>%
-    summarise(
-        `NoFog` = sum(ifelse(Foggy + Heavy.Fog + Smoke, 0, 1), na.rm = T) / n(),
-        `Fog` = sum(Foggy, na.rm = T) / n(),
-        `HeavyFog` = sum(Heavy.Fog, na.rm = T) / n(),
-        `Smoke` = sum(Smoke, na.rm = T) / n(),
-        `IceFog` = sum(Ice.Fog, na.rm = T) / n(),
-    ) %>%
-    pivot_longer(
-        everything(),
-        names_to = "Fog Type",
-        values_to = "Proportion"
-    ) %>%
-    ggplot() +
-    geom_col(
-        aes(x = `Fog Type`, y = Proportion),
-        fill = "steelblue", width = 0.5
-    ) +
-    theme_bw() +
-    ggtitle("Proportion of Injury Accidents by Fog Type")
-
-
-accidents_full %>%
-    summarise(
-        NoFog = mean(`NUMBER OF PERSONS INJURED` *
-            (ifelse(Foggy + Heavy.Fog + Smoke, 0, 1)), na.rm = T),
-        Fog = mean(`NUMBER OF PERSONS INJURED` * Foggy, na.rm = T),
-        HeavyFog = mean(`NUMBER OF PERSONS INJURED` * Heavy.Fog, na.rm = T),
-        Smoke = mean(`NUMBER OF PERSONS INJURED` * Smoke, na.rm = T),
-        IceFog = mean(`NUMBER OF PERSONS INJURED` * Ice.Fog, na.rm = T)
-    ) %>%
-    pivot_longer(
-        everything(),
-        names_to = "Fog Type",
-        values_to = "mean_injury"
-    ) %>%
-    ggplot(aes(`Fog Type`, mean_injury)) +
-    geom_col(fill = "steelblue", width = 0.5) +
-    xlab("Fog Type") +
-    ylab("Mean Injury (Base on degree of fog)") +
-    theme_bw() +
-    ggtitle("Mean Injury by Fog Type")
-
-accidents_full %>%
-    filter(`NUMBER OF PERSONS INJURED` > 5) %>%
-    group_by(DayLight) %>%
-    summarise(
-        DayLight = as.factor(DayLight),
-        injury = `NUMBER OF PERSONS INJURED`
-    ) %>%
-    drop_na() %>%
-    ggplot(aes(DayLight, injury)) +
-    ylab("Injury") +
-    geom_boxplot() +
-    ggtitle("Box Plot of Injury by Daylight (Injury Number > 5)")
-
-
-accidents_full %>%
-    mutate(
-        prcp_range = case_when(
-            PRCP == 0 | is.na(PRCP) ~ "No Rain",
-            PRCP < 0.4 ~ "Light Rain",
-            PRCP < 1.0 ~ "Moderate Rain",
-            PRCP < 2.0 ~ "Heavy Rain",
-            PRCP < 4.0 ~ "Very Heavy Rain",
-            PRCP < 10.0 ~ "Extreme Rain",
-            T ~ "Super Extreme Rain"
-        )
-    ) %>%
-    group_by(prcp_range) %>%
-    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
-    ggplot(
-        aes(x = `prcp_range`, y = injury)
-    ) +
-    xlab("Precipitation Level") +
-    ylab("Injury") +
-    geom_col(fill = "steelblue")
-
-
-(accidents_full) %>%
-    mutate(
-        snow_range = case_when(
-            SNOW == 0 | is.na(SNOW) ~ "No Snow",
-            SNOW < 0.4 * 13 ~ "Light Snow",
-            SNOW < 1.0 * 13 ~ "Moderate Snow",
-            SNOW < 2.0 * 13 ~ "Heavy Snow",
-            SNOW < 4.0 * 13 ~ "Very Heavy Snow",
-            SNOW < 10.0 * 13 ~ "Extreme Snow",
-            T ~ "Super Extreme Snow"
-        )
-    ) %>%
-    group_by(snow_range) %>%
-    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
-    ggplot(
-        aes(x = `snow_range`, y = injury)
-    ) +
-    xlab("Snow Level") +
-    ylab("Injury") +
-    geom_col(fill = "steelblue")
-
-(accidents_full[sample(nrow(accidents_full), 5000), ]) %>%
-    ggplot(aes(PRCP, `NUMBER OF PERSONS INJURED`)) +
-    geom_point()
-
+source("visualization.r")
 ```
 
 ```{r}
 accidents_full <- accidents_full %>%
     mutate(
         truck_involved = (
-            (`VEHICLE TYPE CODE 1` == "Truck") |
-                (`VEHICLE TYPE CODE 2` == "Truck") |
-                (`VEHICLE TYPE CODE 3` == "Truck") |
-                (`VEHICLE TYPE CODE 4` == "Truck") |
-                (`VEHICLE TYPE CODE 5` == "Truck")
+            (`type1` == "Truck") |
+                (`type2` == "Truck") |
+                (`type3` == "Truck") |
+                (`type4` == "Truck") |
+                (`type5` == "Truck")
         ),
         two_wheel_involved = (
-            (`VEHICLE TYPE CODE 1` %in% c("Bike", "Motor")) |
-                (`VEHICLE TYPE CODE 2` %in% c("Bike", "Motor")) |
-                (`VEHICLE TYPE CODE 3` %in% c("Bike", "Motor")) |
-                (`VEHICLE TYPE CODE 4` %in% c("Bike", "Motor")) |
-                (`VEHICLE TYPE CODE 5` %in% c("Bike", "Motor"))
+            (`type1` %in% c("Bike", "Motor")) |
+                (`type2` %in% c("Bike", "Motor")) |
+                (`type3` %in% c("Bike", "Motor")) |
+                (`type4` %in% c("Bike", "Motor")) |
+                (`type5` %in% c("Bike", "Motor"))
         ),
         unconcious_driver = (
             (factor_type1 %in% c("Drug", "Fatigue")) |
-                 (factor_type2 %in% c("Drug", "Fatigue")) |
-                 (factor_type3 %in% c("Drug", "Fatigue")) |
-                 (factor_type4 %in% c("Drug", "Fatigue")) |
-                 (factor_type5 %in% c("Drug", "Fatigue"))
+                (factor_type2 %in% c("Drug", "Fatigue")) |
+                (factor_type3 %in% c("Drug", "Fatigue")) |
+                (factor_type4 %in% c("Drug", "Fatigue")) |
+                (factor_type5 %in% c("Drug", "Fatigue"))
         ),
         crazy_driver = (
             factor_type1 == "Crazy Driver" |
                 factor_type2 == "Crazy Driver" |
                 factor_type3 == "Crazy Driver" |
                 factor_type4 == "Crazy Driver" |
-                factor_type5 == "Crazy Driver" )
-        )%>%
+                factor_type5 == "Crazy Driver")
+    ) %>%
     mutate(
         at_crossing = !is.na(`CROSS STREET`)
     )
@@ -396,7 +144,21 @@ af <- accidents_full %>%
         unconcious_driver,
         crazy_driver
     ) %>%
-    drop_na()
+    mutate(
+        PRCP = ifelse(is.na(PRCP), 0, PRCP),
+        SNOW = ifelse(is.na(SNOW), 0, SNOW),
+        Smoke = ifelse(is.na(Smoke), 0, Smoke),
+        Heavy.Fog = ifelse(is.na(Heavy.Fog), 0, Heavy.Fog),
+        Ice.Fog = ifelse(is.na(Ice.Fog), 0, Ice.Fog),
+        Foggy = ifelse(is.na(Foggy), 0, Foggy)
+    ) %>%
+    drop_na(
+        LONGITUDE,
+        LATITUDE,
+        `NUMBER OF PERSONS INJURED`,
+        `BOROUGH`
+    )
+
 set.seed(123)
 
 rows <- sample(nrow(af)) # Randomly reorder the row of the dataset.
@@ -406,11 +168,10 @@ len <- nrow(af %>% drop_na())
 
 train_df <- af[rows, ][1:train_num, ]
 test_df <- af[rows, ][test_num:len, ]
-
 ```
 
 
-```{r sample & train}
+```{r sample & train, fig.height=10, fig.width=10}
 samples <- sample(nrow(train_df), 150000)
 
 train_df[samples, ] %>%
@@ -700,26 +461,26 @@ step2m.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round2 <- round1 %>%
-    mutate (
+    mutate(
         aic_round2 = c(
-        step2a.model$aic,
-        step2b.model$aic,
-        step2c.model$aic,
-        step2d.model$aic,
-        step2e.model$aic,
-        step2f.model$aic,
-        step2g.model$aic,
-        step2h.model$aic,
-        0,
-        step2j.model$aic,
-        step2k.model$aic,
-        step2l.model$aic,
-        step2m.model$aic
-    ))
+            step2a.model$aic,
+            step2b.model$aic,
+            step2c.model$aic,
+            step2d.model$aic,
+            step2e.model$aic,
+            step2f.model$aic,
+            step2g.model$aic,
+            step2h.model$aic,
+            0,
+            step2j.model$aic,
+            step2k.model$aic,
+            step2l.model$aic,
+            step2m.model$aic
+        )
+    )
 
 round2 %>%
     arrange(aic_round2)
-
 ```
 ```{r}
 # truck invovled
@@ -731,44 +492,44 @@ step3a.model <- glm(
 )
 
 step3b.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +Smoke,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + Smoke,
     data = (train_df),
     family = "binomial"
 )
 
 step3c.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +Heavy.Fog,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + Heavy.Fog,
     data = (train_df),
     family = "binomial"
 )
 
 step3d.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +Ice.Fog,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + Ice.Fog,
     data = (train_df),
     family = "binomial"
 )
 
 
 step3e.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +PRCP,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + PRCP,
     data = (train_df),
     family = "binomial"
 )
 
 step3f.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +SNOW,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + SNOW,
     data = (train_df),
     family = "binomial"
 )
 
 step3g.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +DayLight,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + DayLight,
     data = (train_df),
     family = "binomial"
 )
 
 step3h.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +at_crossing,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing,
     data = (train_df),
     family = "binomial"
 )
@@ -798,26 +559,26 @@ step3m.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round3 <- round2 %>%
-    mutate (
+    mutate(
         aic_round3 = c(
-        step3a.model$aic,
-        step3b.model$aic,
-        step3c.model$aic,
-        step3d.model$aic,
-        step3e.model$aic,
-        step3f.model$aic,
-        step3g.model$aic,
-        step3h.model$aic,
-        0,
-        0,
-        step3k.model$aic,
-        step3l.model$aic,
-        step3m.model$aic
-    ))
+            step3a.model$aic,
+            step3b.model$aic,
+            step3c.model$aic,
+            step3d.model$aic,
+            step3e.model$aic,
+            step3f.model$aic,
+            step3g.model$aic,
+            step3h.model$aic,
+            0,
+            0,
+            step3k.model$aic,
+            step3l.model$aic,
+            step3m.model$aic
+        )
+    )
 
 round3 %>%
     arrange(aic_round3)
-
 ```
 
 ```{r }
@@ -893,22 +654,23 @@ step4m.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round4 <- round3 %>%
-    mutate (
+    mutate(
         aic_round4 = c(
-        step4a.model$aic,
-        step4b.model$aic,
-        step4c.model$aic,
-        step4d.model$aic,
-        step4e.model$aic,
-        step4f.model$aic,
-        step4g.model$aic,
-        0,
-        0,
-        0,
-        step4k.model$aic,
-        step4l.model$aic,
-        step4m.model$aic
-    ))
+            step4a.model$aic,
+            step4b.model$aic,
+            step4c.model$aic,
+            step4d.model$aic,
+            step4e.model$aic,
+            step4f.model$aic,
+            step4g.model$aic,
+            0,
+            0,
+            0,
+            step4k.model$aic,
+            step4l.model$aic,
+            step4m.model$aic
+        )
+    )
 
 round4 %>%
     arrange(aic_round4)
@@ -982,22 +744,23 @@ step5l.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round5 <- round4 %>%
-    mutate (
+    mutate(
         aic_round5 = c(
-        step5a.model$aic,
-        step5b.model$aic,
-        step5c.model$aic,
-        step5d.model$aic,
-        step5e.model$aic,
-        step5f.model$aic,
-        step5g.model$aic,
-        0,
-        0,
-        0,
-        step5k.model$aic,
-        step5l.model$aic,
-        0
-    ))
+            step5a.model$aic,
+            step5b.model$aic,
+            step5c.model$aic,
+            step5d.model$aic,
+            step5e.model$aic,
+            step5f.model$aic,
+            step5g.model$aic,
+            0,
+            0,
+            0,
+            step5k.model$aic,
+            step5l.model$aic,
+            0
+        )
+    )
 
 round5 %>%
     arrange(aic_round5)
@@ -1067,26 +830,26 @@ step6l.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round6 <- round5 %>%
-    mutate (
+    mutate(
         aic_round6 = c(
-        step6a.model$aic,
-        step6b.model$aic,
-        step6c.model$aic,
-        step6d.model$aic,
-        step6e.model$aic,
-        step6f.model$aic,
-        0,
-        0,
-        0,
-        0,
-        step6k.model$aic,
-        step6l.model$aic,
-        0
-    ))
+            step6a.model$aic,
+            step6b.model$aic,
+            step6c.model$aic,
+            step6d.model$aic,
+            step6e.model$aic,
+            step6f.model$aic,
+            0,
+            0,
+            0,
+            0,
+            step6k.model$aic,
+            step6l.model$aic,
+            0
+        )
+    )
 
 round6 %>%
     arrange(aic_round6)
-
 ```
 
 
@@ -1140,22 +903,23 @@ step7l.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round7 <- round6 %>%
-    mutate (
+    mutate(
         aic_round7 = c(
-        step7a.model$aic,
-        step7b.model$aic,
-        step7c.model$aic,
-        step7d.model$aic,
-        step7e.model$aic,
-        step7f.model$aic,
-        0,
-        0,
-        0,
-        0,
-        0,
-        step7l.model$aic,
-        0
-    ))
+            step7a.model$aic,
+            step7b.model$aic,
+            step7c.model$aic,
+            step7d.model$aic,
+            step7e.model$aic,
+            step7f.model$aic,
+            0,
+            0,
+            0,
+            0,
+            0,
+            step7l.model$aic,
+            0
+        )
+    )
 
 round7 %>%
     arrange(aic_round7)
@@ -1163,7 +927,7 @@ round7 %>%
 
 
 ```{r}
-# SNOW 
+# SNOW
 step8a.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + Foggy,
     data = (train_df),
@@ -1206,22 +970,23 @@ step8l.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round8 <- round7 %>%
-    mutate (
+    mutate(
         aic_round8 = c(
-        step8a.model$aic,
-        step8b.model$aic,
-        step8c.model$aic,
-        step8d.model$aic,
-        step8e.model$aic,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        step8l.model$aic,
-        0
-    ))
+            step8a.model$aic,
+            step8b.model$aic,
+            step8c.model$aic,
+            step8d.model$aic,
+            step8e.model$aic,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            step8l.model$aic,
+            0
+        )
+    )
 
 round8 %>%
     arrange(aic_round8)
@@ -1263,26 +1028,26 @@ step9l.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round9 <- round8 %>%
-    mutate (
+    mutate(
         aic_round9 = c(
-        step9a.model$aic,
-        step9b.model$aic,
-        step9c.model$aic,
-        step9d.model$aic,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        step9l.model$aic,
-        0
-    ))
+            step9a.model$aic,
+            step9b.model$aic,
+            step9c.model$aic,
+            step9d.model$aic,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            step9l.model$aic,
+            0
+        )
+    )
 
 round9 %>%
     arrange(aic_round9)
-
 ```
 ```{r}
 # Smoke
@@ -1313,26 +1078,26 @@ step10l.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round10 <- round9 %>%
-    mutate (
+    mutate(
         aic_round10 = c(
-        step10a.model$aic,
-        0,
-        step10c.model$aic,
-        step10d.model$aic,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        step10l.model$aic,
-        0
-    ))
+            step10a.model$aic,
+            0,
+            step10c.model$aic,
+            step10d.model$aic,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            step10l.model$aic,
+            0
+        )
+    )
 
 round10 %>%
     arrange(aic_round10)
-
 ```
 ```{r}
 # Foggy
@@ -1357,26 +1122,26 @@ step11l.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round11 <- round10 %>%
-    mutate (
+    mutate(
         aic_round11 = c(
-        0,
-        0,
-        step11c.model$aic,
-        step11d.model$aic,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        step11l.model$aic,
-        0
-    ))
+            0,
+            0,
+            step11c.model$aic,
+            step11d.model$aic,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            step11l.model$aic,
+            0
+        )
+    )
 
 round11 %>%
     arrange(aic_round11)
-
 ```
 
 
@@ -1397,26 +1162,26 @@ step12l.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round12 <- round11 %>%
-    mutate (
+    mutate(
         aic_round12 = c(
-        0,
-        0,
-        step12c.model$aic,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        step12l.model$aic,
-        0
-    ))
+            0,
+            0,
+            step12c.model$aic,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            step12l.model$aic,
+            0
+        )
+    )
 
 round12 %>%
     arrange(aic_round12)
-
 ```
 
 ```{r}
@@ -1430,47 +1195,48 @@ step13c.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round13 <- round12 %>%
-    mutate (
+    mutate(
         aic_round13 = c(
-        0,
-        0,
-        step13c.model$aic,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-    ))
+            0,
+            0,
+            step13c.model$aic,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        )
+    )
 
 round13 %>%
     arrange(aic_round13)
-
 ```
 ```{r}
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 model_selection <- round13 %>%
-    mutate (
+    mutate(
         aic_round14 = c(
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-    ))
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        )
+    )
 
 model_selection %>%
     head(11)

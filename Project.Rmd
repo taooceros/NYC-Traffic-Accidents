@@ -170,7 +170,7 @@ test_df <- af[rows, ][test_num:len, ]
 source("visualization.r")
 ```
 
-```{r sample & train, fig.height=10, fig.width=10}
+```{r sample & train, fig.height=5, fig.width=5}
 samples <- sample(nrow(train_df), 150000)
 
 train_df[samples, ] %>%
@@ -198,10 +198,10 @@ train_df[samples, ] %>%
                         LONGITUDE > -73.91 & LONGITUDE < -73.89
                 )
         ),
-        alpha = 0.6
+        alpha = 0.1
     ) +
     labs(color = "Serious Area") +
-    theme(text = element_text(size = 20)) 
+    theme(text = element_text(size = 10)) 
 ```
 
 ```{r serious accident location}
@@ -1414,17 +1414,18 @@ accident_d <- accident_c %>%
     mutate(percentage = n/total)
 
 condition <- rep(c(0, 1) , 10)
-type <- rep(accident_c$type1 %>% unique(), 2)
-ggplot(accident_c, aes(fill = as.factor(condition), y = percentage, x = type))+
+#type <- rep(accident_c$type1 %>% unique(), 2)
+ggplot(accident_d, aes(fill = as.factor(condition), y = percentage, x = type1))+
     geom_bar(position = position_dodge(), stat='identity') +
-    ylab("Count of accidents having injured persons") +
-    ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +
-    guides(fill=guide_legend(title="Condition"))
+    ylab("Percentage of accidents having injured persons") +
+    ggtitle("Percentage of Accidents Having Injured Persons For Different Types of Vehicles") +
+    guides(fill=guide_legend(title="Has Injury")) +
+    xlab("Vehicle Type")
 
 ggplot(accident_a, aes(x = type1, y = n/total))+
     geom_col() +
     ylab("Percentage of accidents") +
-    ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +
+    ggtitle("Percentage of Accidents Having Injured Persons For Different Types of Vehicles") +
     xlab("Vehicle Type")
 
 ```

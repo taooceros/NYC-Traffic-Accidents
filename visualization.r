@@ -136,8 +136,8 @@ accident_included_injury %>%
     ) +
     theme(
         axis.text.x = element_text(angle = 60, hjust = 1)
-    ) + 
-    ggtitle("Percentage of Accidents Having Injured Persons For Different Types of Vehicles Included in the accident") + 
+    ) +
+    ggtitle("Percentage of Accidents Having Injured Persons For Different Types of Vehicles Included in the accident") +
     ylab("Percentage of Accidents Having Injured Persons") +
     xlab("Vehicle Type") +
     theme_bw()
@@ -160,6 +160,115 @@ accidents_full %>%
     geom_col(aes(x = `Fog Type`, y = Proportion), fill = "steelblue") +
     theme_bw() +
     ggtitle("Proportion of Accidents by Fog Type")
+
+
+accidents_injury_factor <- accidents_full %>%
+    mutate(
+        `Crazy Driver Included` = `factor_type1` == "Crazy Driver" |
+            `factor_type2` == "Crazy Driver" |
+            `factor_type3` == "Crazy Driver" |
+            `factor_type4` == "Crazy Driver" |
+            `factor_type5` == "Crazy Driver",
+        `Disobey Traffic Rule Included` = `factor_type1` == "Disobey Rule" |
+            `factor_type2` == "Disobey Rule" |
+            `factor_type3` == "Disobey Rule" |
+            `factor_type4` == "Disobey Rule" |
+            `factor_type5` == "Disobey Rule",
+        `Distraction Included` = `factor_type1` == "Distraction" |
+            `factor_type2` == "Distraction" |
+            `factor_type3` == "Distraction" |
+            `factor_type4` == "Distraction" |
+            `factor_type5` == "Distraction",
+        `Drug Included` = `factor_type1` == "Drug" |
+            `factor_type2` == "Drug" |
+            `factor_type3` == "Drug" |
+            `factor_type4` == "Drug" |
+            `factor_type5` == "Drug",
+        `Environment Included` = `factor_type1` == "Environment" |
+            `factor_type2` == "Environment" |
+            `factor_type3` == "Environment" |
+            `factor_type4` == "Environment" |
+            `factor_type5` == "Environment",
+        `Failure to Keep Right Included` = `factor_type1` == "Failure to Keep Right" |
+            `factor_type2` == "Failure to Keep Right" |
+            `factor_type3` == "Failure to Keep Right" |
+            `factor_type4` == "Failure to Keep Right" |
+            `factor_type5` == "Failure to Keep Right",
+        `Fatigue Included` = `factor_type1` == "Fatigue" |
+            `factor_type2` == "Fatigue" |
+            `factor_type3` == "Fatigue" |
+            `factor_type4` == "Fatigue" |
+            `factor_type5` == "Fatigue",
+        `Health Included` = `factor_type1` == "Health" |
+            `factor_type2` == "Health" |
+            `factor_type3` == "Health" |
+            `factor_type4` == "Health" |
+            `factor_type5` == "Health",
+        `Majeure Included` = `factor_type1` == "Majeure" |
+            `factor_type2` == "Majeure" |
+            `factor_type3` == "Majeure" |
+            `factor_type4` == "Majeure" |
+            `factor_type5` == "Majeure",
+        `Phone Held Included` = `factor_type1` == "Phone Held" |
+            `factor_type2` == "Phone Held" |
+            `factor_type3` == "Phone Held" |
+            `factor_type4` == "Phone Held" |
+            `factor_type5` == "Phone Held",
+        `V Defection Included` = `factor_type1` == "V Defection" |
+            `factor_type2` == "V Defection" |
+            `factor_type3` == "V Defection" |
+            `factor_type4` == "V Defection" |
+            `factor_type5` == "V Defection"
+    ) %>%
+    select(
+        `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, starts_with("factor"), ends_with("Included")
+    ) %>%
+    pivot_longer(
+        ends_with("Included"),
+        "factor_type_included"
+    ) %>%
+    filter(value) %>%
+    group_by(factor_type_included) %>%
+    drop_na() %>%
+    summarise(
+        n = sum(`NUMBER OF PERSONS INJURED` | `NUMBER OF PERSONS KILLED`),
+        total = n(),
+        percentage = n / total,
+        percentage_opp = 1 - percentage
+    ) %>%
+    pivot_longer(
+        names_to = "Injuried",
+        starts_with("percentage"),
+        values_to = "percentage"
+    ) %>%
+    mutate(
+        Injuried = Injuried == "percentage"
+    )
+
+accidents_injury_factor %>%
+    ggplot(
+        aes(
+            x = factor_type_included
+        )
+    ) +
+    geom_bar(
+        aes(
+            y = percentage,
+            fill = Injuried
+        ),
+        position = position_dodge2(),
+        stat = "identity",
+        group = 1
+    ) +
+    theme_bw() +
+    theme(
+        axis.text.x = element_text(angle = 30, hjust = 1)
+    ) +
+    ggtitle("Percentage of Accidents Having Injured Persons For Different Types of Contributing Factor Included in the accident") +
+    ylab("Percentage of Accidents Having Injured Persons") +
+    xlab("Contributing Factor")
+
+
 
 accidents_full %>%
     filter(`NUMBER OF PERSONS INJURED` > 0) %>%

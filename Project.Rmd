@@ -1430,4 +1430,44 @@ ggplot(accident_a, aes(x = type1, y = n/total))+
 
 ```
 
+```{r fig.height=15, fig.width=10}
+accident_e <- accidents_full %>% 
+    group_by(factor_type1) %>% 
+    mutate(has.injury = ifelse((`NUMBER OF PERSONS INJURED` > 0 | `NUMBER OF PERSONS KILLED` > 0), 1, 0))
+
+accident_f <- accident_e %>% 
+    group_by(factor_type1) %>% 
+    filter(factor_type1 != "Unspecified") %>% 
+    count(has.injury) %>% 
+    drop_na() %>% 
+    summarize(n = sum(n)) %>% 
+    rename(total = n)
+
+accident_g <- accident_e %>% 
+    group_by(factor_type1) %>% 
+    filter(factor_type1 != "Unspecified") %>% 
+    count(has.injury) %>% 
+    drop_na() %>% 
+    right_join(accident_f) %>% 
+    filter(has.injury == 1)
+
+accident_h <- accident_e %>% 
+    group_by(factor_type1) %>% 
+    filter(factor_type1 != "Unspecified") %>% 
+    count(has.injury) %>% 
+    drop_na() %>% 
+    right_join(accident_f) %>% 
+    mutate(percentage = n/total)
+
+condition <- rep(c(0, 1) , 11)
+#type <- rep(accident_c$type1 %>% unique(), 2)
+ggplot(accident_h, aes(fill = as.factor(condition), y = percentage, x = factor_type1))+
+    geom_bar(position = position_dodge(), stat='identity') +
+    ylab("Percentage of accidents having injured persons") +
+    ggtitle("Percentage of Accidents Having Injured Persons For Different Types of Vehicles") +
+    guides(fill=guide_legend(title="Has Injury")) +
+    xlab("Contributing Factor")
+```
+
+
 

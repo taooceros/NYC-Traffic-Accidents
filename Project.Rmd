@@ -113,22 +113,6 @@ accident %>%
     )
 ```
 
-```{r}
-collisions_location <- accident %>%
-    mutate(year = year(`CRASH DATE`)) %>%
-    select("LATITUDE", "LONGITUDE", "year") %>%
-    drop_na() %>%
-    filter(LATITUDE != 0 & LONGITUDE != 0) %>%
-    filter(year %in% c(2019, 2020, 2021))
-collisions_location
-```
-
-```{r}
-accident_road <- accident %>%
-    group_by(`ON STREET NAME`) %>%
-    summarise(count = n())
-```
-
 
 ```{r Time Separation}
 
@@ -382,8 +366,14 @@ accidents_full <- accidents_full %>%
                 (`VEHICLE TYPE CODE 3` %in% c("Bike", "Motor")) |
                 (`VEHICLE TYPE CODE 4` %in% c("Bike", "Motor")) |
                 (`VEHICLE TYPE CODE 5` %in% c("Bike", "Motor"))
-        )
-    ) %>%
+        ),
+        unconcious_driver = (
+            (factor_type1 %in% c("Drug", "Fatigue") |
+                 (factor_type2 %in% c("Drug", "Fatigue") |
+                 (factor_type3 %in% c("Drug", "Fatigue") |
+                 (factor_type4 %in% c("Drug", "Fatigue") |
+                 (factor_type5 %in% c("Drug", "Fatigue") )
+        )%>%
     mutate(
         at_crossing = !is.na(`CROSS STREET`)
     )
@@ -393,7 +383,24 @@ accidents_full <- accidents_full %>%
 ```{r model}
 # seperate trainning data and testing data
 af <- accidents_full %>%
-    select(`NUMBER OF PERSONS INJURED`, `LONGITUDE`, `LATITUDE`, Foggy, Smoke, Heavy.Fog, `VEHICLE TYPE CODE 1`, PRCP, SNOW, Ice.Fog, DayLight, `BOROUGH`, `LOCATION_SPLIT`, at_crossing, two_wheel_involved, truck_involved) %>%
+    select(
+        `NUMBER OF PERSONS INJURED`,
+        `LONGITUDE`,
+        `LATITUDE`,
+        Foggy,
+        Smoke,
+        Heavy.Fog,
+        PRCP,
+        SNOW,
+        Ice.Fog,
+        DayLight,
+        `BOROUGH`,
+        `LOCATION_SPLIT`,
+        at_crossing,
+        two_wheel_involved,
+        truck_involved,
+        starts_with("type")
+    ) %>%
     drop_na()
 set.seed(123)
 
@@ -405,26 +412,10 @@ len <- nrow(af %>% drop_na())
 train_df <- af[rows, ][1:train_num, ]
 test_df <- af[rows, ][test_num:len, ]
 
-# generate model
-model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Smoke + Heavy.Fog + `VEHICLE TYPE CODE 1` + PRCP + SNOW + Ice.Fog + DayLight + `BOROUGH` + `LOCATION_SPLIT` + at_crossing + two_wheel_involved + truck_involved,
-    data = (train_df),
-    family = "binomial"
-)
-
-test_df <- test_df %>% mutate(status = case_when(`NUMBER OF PERSONS INJURED` > 0 ~ 1, TRUE ~ 0))
-
-probabilities <- predict(lm_1, type = "response", newdata = test_df)
-predictions <- ifelse(probabilities > 0.5, 1, 0)
-sum(predictions == test_df$status)
-sum(predictions == 1)
-sum(predictions & test_df$status)
-sum(test_df$status == 1)
 ```
 
 
-```{r accident location mean}
-
+```{r sample & train}
 samples <- sample(nrow(train_df), 150000)
 
 train_df[samples, ] %>%
@@ -457,7 +448,40 @@ train_df[samples, ] %>%
     labs(color = "Serious Area")
 ```
 
-```{r Model Selection (Step)}
+```{r serious accident location}
+
+selector <- function(LATITUDE, LONGITUDE) {
+    (
+        LATITUDE > 40.64 & LATITUDE < 40.68 &
+            LONGITUDE > -73.965 & LONGITUDE < -73.89
+    ) | (
+        LATITUDE > 40.68 & LATITUDE < 40.77 &
+            LONGITUDE > -74.02 & LONGITUDE < -73.955
+    ) | (
+        LATITUDE > 40.79 & LATITUDE < 40.825 &
+            LONGITUDE > -74.059 & LONGITUDE < -73.885
+    ) | (
+        LATITUDE > 40.695 & LATITUDE < 40.72 &
+            LONGITUDE > -73.96 & LONGITUDE < -73.935
+    ) | (
+        LATITUDE > 40.847 & LATITUDE < 40.865 &
+            LONGITUDE > -73.91 & LONGITUDE < -73.89
+    )
+}
+
+train_df <- train_df %>%
+    mutate(
+        serious_area = selector(`LATITUDE`, `LONGITUDE`)
+    )
+    
+test_df = test_df %>% 
+    mutate(
+        serious_area = selector(`LATITUDE`, `LONGITUDE`)
+    )
+```
+
+```{r Accuracy (Step)}
+
 test.accuracy <- function(model, test_df) {
     prediction.full <- model %>% predict(test_df, type = "response");
     predicted.full <- ifelse(prediction.full > 0.5, TRUE, FALSE);
@@ -466,12 +490,19 @@ test.accuracy <- function(model, test_df) {
 }
 
 full.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + Ice.Fog + DayLight + at_crossing + two_wheel_involved + truck_involved,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ Foggy + Smoke + Heavy.Fog + Ice.Fog + PRCP + SNOW + Ice.Fog + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area,
     data = (train_df),
     family = "binomial"
 )
 
+summary(full.model)
+
 test.accuracy(full.model, test_df)
+
+```
+
+
+```{r Model Selection}
 
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved
 
@@ -938,33 +969,7 @@ round6 %>%
 
 ```
 
-```{r serious accident location}
 
-selector <- function(LATITUDE, LONGITUDE) {
-    (
-        LATITUDE > 40.64 & LATITUDE < 40.68 &
-            LONGITUDE > -73.965 & LONGITUDE < -73.89
-    ) | (
-        LATITUDE > 40.68 & LATITUDE < 40.77 &
-            LONGITUDE > -74.02 & LONGITUDE < -73.955
-    ) | (
-        LATITUDE > 40.79 & LATITUDE < 40.825 &
-            LONGITUDE > -74.059 & LONGITUDE < -73.885
-    ) | (
-        LATITUDE > 40.695 & LATITUDE < 40.72 &
-            LONGITUDE > -73.96 & LONGITUDE < -73.935
-    ) | (
-        LATITUDE > 40.847 & LATITUDE < 40.865 &
-            LONGITUDE > -73.91 & LONGITUDE < -73.89
-    )
-}
-
-train_df <- train_df %>%
-    mutate(
-        serious = selector(`LATITUDE`, `LONGITUDE`)
-    )
-    
-```
 
 
 ```{r randomForest}

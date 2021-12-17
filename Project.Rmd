@@ -1390,11 +1390,12 @@ accident_c <- accidents_full %>%
     mutate(has.injury = ifelse((`NUMBER OF PERSONS INJURED` > 0 | `NUMBER OF PERSONS KILLED` > 0), 1, 0))
 
 accident_c <- accident_c %>% 
-    filter(has.injury == 1 & type1 != "Unknown") %>% 
     group_by(type1) %>% 
+    filter(type1 != "Unknown") %>% 
     count(has.injury) %>% 
-    drop_na() 
+    drop_na()
 
+t <- rowsum(accident_c$n,rep(1:10,each=2))
 
 # condition <- rep(c(0, 1) , 10)
 # type <- rep(accident_c$type1 %>% unique(), 2)
@@ -1409,6 +1410,7 @@ ggplot(accident_c, aes(x = type1, y = n))+
     ylab("Number of accidents") +
     ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +
     xlab("Vehicle Type")
+
 ```
 
 

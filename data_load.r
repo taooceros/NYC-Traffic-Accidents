@@ -2,25 +2,25 @@ require(tidyverse)
 require(lubridate)
 
 set.seed(203741092)
-truck_type1 <- read_csv("truck_type-1.csv", show_col_types = F) %>%
+truck_type1 <- read_csv("truck_type-1.csv") %>%
     rename(type1 = type)
-truck_type2 <- read_csv("truck_type-2.csv", show_col_types = F) %>%
+truck_type2 <- read_csv("truck_type-2.csv") %>%
     rename(type2 = type)
-truck_type3 <- read_csv("truck_type-3.csv", show_col_types = F) %>%
+truck_type3 <- read_csv("truck_type-3.csv") %>%
     rename(type3 = type)
-truck_type4 <- read_csv("truck_type-4.csv", show_col_types = F) %>%
+truck_type4 <- read_csv("truck_type-4.csv") %>%
     rename(type4 = type)
-truck_type5 <- read_csv("truck_type-5.csv", show_col_types = F) %>%
+truck_type5 <- read_csv("truck_type-5.csv") %>%
     rename(type5 = type)
-factor1 <- read_csv("factor-1.csv", show_col_types = F) %>%
+factor1 <- read_csv("factor-1.csv") %>%
     rename(factor_type1 = factor_type)
-factor2 <- read_csv("factor-2.csv", show_col_types = F) %>%
+factor2 <- read_csv("factor-2.csv") %>%
     rename(factor_type2 = factor_type)
-factor3 <- read_csv("factor-3.csv", show_col_types = F) %>%
+factor3 <- read_csv("factor-3.csv") %>%
     rename(factor_type3 = factor_type)
-factor4 <- read_csv("factor-4.csv", show_col_types = F) %>%
+factor4 <- read_csv("factor-4.csv") %>%
     rename(factor_type4 = factor_type)
-factor5 <- read_csv("factor-5.csv", show_col_types = F) %>%
+factor5 <- read_csv("factor-5.csv") %>%
     rename(factor_type5 = factor_type)
 
 accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv")
@@ -39,9 +39,9 @@ accident <- accident %>%
         factor_type5 = factor5$factor_type5,
     )
 
-weather12_14 <- read_csv("noaa12_14.csv", show_col_types = F)
-weather15_17 <- read_csv("noaa15_17.csv", show_col_types = F)
-weather18_21 <- read_csv("noaa18_21.csv", show_col_types = F)
+weather12_14 <- read_csv("noaa12_14.csv")
+weather15_17 <- read_csv("noaa15_17.csv")
+weather18_21 <- read_csv("noaa18_21.csv")
 weather12_21 <- weather12_14 %>%
     add_row(weather15_17) %>%
     add_row(weather18_21)

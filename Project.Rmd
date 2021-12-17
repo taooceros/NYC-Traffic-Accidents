@@ -1413,17 +1413,17 @@ accident_d <- accident_c %>%
     right_join(accident_b) %>% 
     mutate(percentage = n/total)
 
-# condition <- rep(c(0, 1) , 10)
-# type <- rep(accident_c$type1 %>% unique(), 2)
-# ggplot(accident_c, aes(fill = as.factor(condition), y = percentage, x = type))+
-#     geom_bar(position = position_dodge(), stat='identity') +
-#     ylab("Count of accidents having injured persons") +
-#     ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +
-#     guides(fill=guide_legend(title="Condition"))
+condition <- rep(c(0, 1) , 10)
+type <- rep(accident_c$type1 %>% unique(), 2)
+ggplot(accident_c, aes(fill = as.factor(condition), y = percentage, x = type))+
+    geom_bar(position = position_dodge(), stat='identity') +
+    ylab("Count of accidents having injured persons") +
+    ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +
+    guides(fill=guide_legend(title="Condition"))
 
 ggplot(accident_a, aes(x = type1, y = n/total))+
     geom_col() +
-    ylab("Number of accidents") +
+    ylab("Percentage of accidents") +
     ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +
     xlab("Vehicle Type")
 

@@ -27,28 +27,20 @@ factor4 <- read_csv("factor-4.csv") %>%
 factor5 <- read_csv("factor-5.csv") %>%
     rename(factor_type5 = factor_type)
 
-accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv") %>%
-    left_join(truck_type1, by = "COLLISION_ID") %>%
-    left_join(truck_type2, by = "COLLISION_ID") %>%
-    left_join(truck_type3, by = "COLLISION_ID") %>%
-    left_join(truck_type4, by = "COLLISION_ID") %>%
-    left_join(truck_type5, by = "COLLISION_ID") %>%
-    left_join(factor1, by = "COLLISION_ID") %>%
-    left_join(factor2, by = "COLLISION_ID") %>%
-    left_join(factor3, by = "COLLISION_ID") %>%
-    left_join(factor4, by = "COLLISION_ID") %>%
-    left_join(factor5, by = "COLLISION_ID") %>%
+accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv")
+
+accident <- accident %>%
     mutate(
-        `VEHICLE TYPE CODE 1` = type1,
-        `VEHICLE TYPE CODE 2` = type2,
-        `VEHICLE TYPE CODE 3` = type3,
-        `VEHICLE TYPE CODE 4` = type4,
-        `VEHICLE TYPE CODE 5` = type5,
-        `CONTRIBUTING FACTOR VEHICLE 1` = factor_type1,
-        `CONTRIBUTING FACTOR VEHICLE 2` = factor_type2,
-        `CONTRIBUTING FACTOR VEHICLE 3` = factor_type3,
-        `CONTRIBUTING FACTOR VEHICLE 4` = factor_type4,
-        `CONTRIBUTING FACTOR VEHICLE 5` = factor_type5
+        type1 = truck_type1$type1,
+        type2 = truck_type2$type2,
+        type3 = truck_type3$type3,
+        type4 = truck_type4$type4,
+        type5 = truck_type5$type5,
+        factor_type1 = factor1$factor_type1,
+        factor_type2 = factor2$factor_type2,
+        factor_type3 = factor3$factor_type3,
+        factor_type4 = factor4$factor_type4,
+        factor_type5 = factor5$factor_type5,
     )
 
 weather12_14 <- read_csv("noaa12_14.csv")
@@ -85,6 +77,8 @@ weather <- weather12_21 %>%
         Rain = WT16,
         Unknown.Precipitation = WT19
     )
+
+rm(weather12_14, weather15_17, weather18_21)
 ```
 
 ```{r na analysis}
@@ -118,13 +112,14 @@ accident %>%
 
 accident <- accident %>%
     mutate(
+        hour = hour(`CRASH DATE`),
         time_range = case_when(
-            hour(`CRASH TIME`) < 4 ~ "Late Night",
-            hour(`CRASH TIME`) < 8 ~ "Morning",
-            hour(`CRASH TIME`) < 12 ~ "Midday",
-            hour(`CRASH TIME`) < 16 ~ "Afternoon",
-            hour(`CRASH TIME`) < 20 ~ "Evening",
-            hour(`CRASH TIME`) < 24 ~ "Late Night"
+            hour < 4 ~ "Late Night",
+            hour < 8 ~ "Morning",
+            hour < 12 ~ "Midday",
+            hour < 16 ~ "Afternoon",
+            hour < 20 ~ "Evening",
+            hour < 24 ~ "Late Night"
         )
     )
 ```
@@ -369,11 +364,12 @@ accidents_full <- accidents_full %>%
         ),
         unconcious_driver = (
             (factor_type1 %in% c("Drug", "Fatigue")) |
-                 (factor_type2 %in% c("Drug", "Fatigue")) |
-                 (factor_type3 %in% c("Drug", "Fatigue")) |
-                 (factor_type4 %in% c("Drug", "Fatigue")) |
-                 (factor_type5 %in% c("Drug", "Fatigue"))
-        ))%>%
+                (factor_type2 %in% c("Drug", "Fatigue")) |
+                (factor_type3 %in% c("Drug", "Fatigue")) |
+                (factor_type4 %in% c("Drug", "Fatigue")) |
+                (factor_type5 %in% c("Drug", "Fatigue"))
+        )
+    ) %>%
     mutate(
         at_crossing = !is.na(`CROSS STREET`)
     )
@@ -473,8 +469,8 @@ train_df <- train_df %>%
     mutate(
         serious_area = selector(`LATITUDE`, `LONGITUDE`)
     )
-    
-test_df = test_df %>% 
+
+test_df <- test_df %>%
     mutate(
         serious_area = selector(`LATITUDE`, `LONGITUDE`)
     )
@@ -483,10 +479,10 @@ test_df = test_df %>%
 ```{r Accuracy (Step)}
 
 test.accuracy <- function(model, test_df) {
-    prediction.full <- model %>% predict(test_df, type = "response");
-    predicted.full <- ifelse(prediction.full > 0.5, TRUE, FALSE);
-    observed.full <- (test_df$`NUMBER OF PERSONS INJURED` > 0);
-    return(mean(predicted.full == observed.full));
+    prediction.full <- model %>% predict(test_df, type = "response")
+    predicted.full <- ifelse(prediction.full > 0.5, TRUE, FALSE)
+    observed.full <- (test_df$`NUMBER OF PERSONS INJURED` > 0)
+    return(mean(predicted.full == observed.full))
 }
 
 full.model <- glm(
@@ -498,7 +494,6 @@ full.model <- glm(
 summary(full.model)
 
 test.accuracy(full.model, test_df)
-
 ```
 
 
@@ -580,7 +575,7 @@ step1j.model <- glm(
 # Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved
 
 round1 <- tibble(
-     model = c(
+    model = c(
         "Foggy",
         "Smoke",
         "Heavy.Fog",
@@ -966,7 +961,6 @@ round6 %>%
     arrange(aic_round6)
 
 # round 7 ()
-
 ```
 
 

@@ -438,14 +438,32 @@ samples <- sample(nrow(train_df), 150000)
 
 train_df[samples, ] %>%
     filter(`LONGITUDE` != 0 & `LATITUDE` != 0) %>%
+    filter(`NUMBER OF PERSONS INJURED` > 0) %>%
     ggplot() +
     geom_point(
         aes(
-            x = `LATITUDE`, y = `LONGITUDE`, size = (`NUMBER OF PERSONS INJURED`^3) / 10,
-            color = `NUMBER OF PERSONS INJURED` > 0
+            x = `LATITUDE`, y = `LONGITUDE`,
+            color = 
+                (
+                    LATITUDE > 40.64 & LATITUDE < 40.68 &
+                        LONGITUDE > -73.965 & LONGITUDE < -73.89
+                ) | (
+                    LATITUDE > 40.68 & LATITUDE < 40.77 &
+                        LONGITUDE > -74.02 & LONGITUDE < -73.955
+                ) | (
+                    LATITUDE > 40.79 & LATITUDE < 40.825 &
+                        LONGITUDE > -74.059 & LONGITUDE < -73.885
+                ) | (
+                    LATITUDE > 40.695 & LATITUDE < 40.72 &
+                        LONGITUDE > -73.96 & LONGITUDE < -73.935
+                ) | (
+                    LATITUDE > 40.847 & LATITUDE < 40.865 &
+                        LONGITUDE > -73.91 & LONGITUDE < -73.89
+                )
         ),
-        alpha = 0.1
-    )
+        alpha = 0.005
+    ) +
+    labs(color="Serious Area")
 ```
 
 ```{r randomForest}

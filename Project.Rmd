@@ -16,19 +16,39 @@ truck_type4 <- read_csv("truck_type-4.csv") %>%
     rename(type4 = type)
 truck_type5 <- read_csv("truck_type-5.csv") %>%
     rename(type5 = type)
+factor1 <- read_csv("factor-1.csv") %>%
+    rename(factor_type1 = factor_type)
+factor2 <- read_csv("factor-2.csv") %>%
+    rename(factor_type2 = factor_type)
+factor3 <- read_csv("factor-3.csv") %>%
+    rename(factor_type3 = factor_type)
+factor4 <- read_csv("factor-4.csv") %>%
+    rename(factor_type4 = factor_type)
+factor5 <- read_csv("factor-5.csv") %>%
+    rename(factor_type5 = factor_type)
 accident <- read_csv("Motor_Vehicle_Collisions_-_Crashes.csv") %>%
     left_join(truck_type1, by = "COLLISION_ID") %>%
     left_join(truck_type2, by = "COLLISION_ID") %>%
     left_join(truck_type3, by = "COLLISION_ID") %>%
     left_join(truck_type4, by = "COLLISION_ID") %>%
     left_join(truck_type5, by = "COLLISION_ID") %>%
-    select(-c(`VEHICLE TYPE CODE 1`, `VEHICLE TYPE CODE 2`, `VEHICLE TYPE CODE 3`, `VEHICLE TYPE CODE 4`, `VEHICLE TYPE CODE 5`)) %>%
+    left_join(factor1, by = "COLLISION_ID") %>%
+    left_join(factor2, by = "COLLISION_ID") %>%
+    left_join(factor3, by = "COLLISION_ID") %>%
+    left_join(factor4, by = "COLLISION_ID") %>%
+    left_join(factor5, by = "COLLISION_ID") %>%
+    select(-c(`VEHICLE TYPE CODE 1`, `VEHICLE TYPE CODE 2`, `VEHICLE TYPE CODE 3`, `VEHICLE TYPE CODE 4`, `VEHICLE TYPE CODE 5`, `CONTRIBUTING FACTOR VEHICLE 1`, `CONTRIBUTING FACTOR VEHICLE 2`, `CONTRIBUTING FACTOR VEHICLE 3`, `CONTRIBUTING FACTOR VEHICLE 4`, `CONTRIBUTING FACTOR VEHICLE 5`)) %>%
     rename(
         `VEHICLE TYPE CODE 1` = type1,
         `VEHICLE TYPE CODE 2` = type2,
         `VEHICLE TYPE CODE 3` = type3,
         `VEHICLE TYPE CODE 4` = type4,
-        `VEHICLE TYPE CODE 5` = type5
+        `VEHICLE TYPE CODE 5` = type5,
+        `CONTRIBUTING FACTOR VEHICLE 1` = factor_type1,
+        `CONTRIBUTING FACTOR VEHICLE 2` = factor_type2,
+        `CONTRIBUTING FACTOR VEHICLE 3` = factor_type3,
+        `CONTRIBUTING FACTOR VEHICLE 4` = factor_type4,
+        `CONTRIBUTING FACTOR VEHICLE 5` = factor_type5
     )
 
 weather12_14 <- read_csv("noaa12_14.csv")

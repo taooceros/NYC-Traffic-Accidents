@@ -201,7 +201,7 @@ train_df[samples, ] %>%
         alpha = 0.1
     ) +
     labs(color = "Serious Area") +
-    theme(text = element_text(size = 10)) 
+    theme(text = element_text(size = 10))
 ```
 
 ```{r serious accident location}
@@ -1326,16 +1326,9 @@ summary(lm3)
 ```
 
 ```{r}
-mean(
-    (trainingAndTestingSet[[2]]$`NUMBER OF PERSONS INJURED` > 0) == (predict(lm2,
-        newdata = trainingAndTestingSet[[2]],
-        type = "response"
-    ) > 0.5),
-    na.rm = T
-)
 
-test.predict <- (tibble(injury = (predict(lm3,
-    newdata = trainingAndTestingSet[[2]], type = "response"
+test.predict <- (tibble(injury = (predict(full.model,
+    newdata = test_df, type = "response"
 ) > 0.5)) %>% drop_na())$injury
 
 test.actual <- (
@@ -1382,52 +1375,5 @@ tibble(
 )
 ```
 
-
-
-```{r}
-accident_c <- accidents_full %>% 
-    group_by(type1) %>% 
-    mutate(has.injury = ifelse((`NUMBER OF PERSONS INJURED` > 0 | `NUMBER OF PERSONS KILLED` > 0), 1, 0))
-
-accident_b <- accident_c %>% 
-    group_by(type1) %>% 
-    filter(type1 != "Unknown") %>% 
-    count(has.injury) %>% 
-    drop_na() %>% 
-    summarize(n = sum(n)) %>% 
-    rename(total = n)
-
-accident_a <- accident_c %>% 
-    group_by(type1) %>% 
-    filter(type1 != "Unknown") %>% 
-    count(has.injury) %>% 
-    drop_na() %>% 
-    right_join(accident_b) %>% 
-    filter(has.injury == 1)
-
-accident_d <- accident_c %>% 
-    group_by(type1) %>% 
-    filter(type1 != "Unknown") %>% 
-    count(has.injury) %>% 
-    drop_na() %>% 
-    right_join(accident_b) %>% 
-    mutate(percentage = n/total)
-
-condition <- rep(c(0, 1) , 10)
-#type <- rep(accident_c$type1 %>% unique(), 2)
-ggplot(accident_d, aes(fill = as.factor(condition), y = percentage, x = type1))+
-    geom_bar(position = position_dodge(), stat='identity') +
-    ylab("Percentage of accidents having injured persons") +
-    ggtitle("Percentage of Accidents Having Injured Persons For Different Types of Vehicles") +
-    guides(fill=guide_legend(title="Has Injury")) +
-    xlab("Vehicle Type")
-
-ggplot(accident_a, aes(x = type1, y = n/total))+
-    geom_col() +
-    ylab("Percentage of accidents") +
-    ggtitle("Percentage of Accidents Having Injured Persons For Different Types of Vehicles") +
-    xlab("Vehicle Type")
-
-```
 
 

@@ -1,3 +1,148 @@
+accident_c <- accidents_full %>%
+    group_by(type1) %>%
+    mutate(has.injury = ifelse(
+        (`NUMBER OF PERSONS INJURED` > 0 | `NUMBER OF PERSONS KILLED` > 0),
+        1,
+        0
+    ))
+
+accident_b <- accident_c %>%
+    group_by(type1) %>%
+    filter(type1 != "Unknown") %>%
+    count(has.injury) %>%
+    drop_na() %>%
+    summarize(
+        has.injury = has.injury,
+        n = n,
+        total = sum(n),
+        percentage = n / total
+    )
+
+condition <- rep(c(0, 1), 10)
+# type <- rep(accident_c$type1 %>% unique(), 2)
+ggplot(
+    accident_b,
+    aes(
+        fill = as.factor(condition),
+        y = percentage, x = type1
+    )
+) +
+    geom_bar(
+        position = position_dodge(),
+        stat = "identity"
+    ) +
+    ylab("Percentage of accidents having injured persons") +
+    ggtitle(
+        "Percentage of Accidents Having Injured Persons For Different Types of Vehicles"
+    ) +
+    guides(fill = guide_legend(title = "Has Injury")) +
+    xlab("Vehicle Type")
+
+accidents_injury_vehicle <- accidents_full %>%
+    mutate(
+        Ambulance_included = type1 == "Ambulance" |
+            type2 == "Ambulance" |
+            type3 == "Ambulance" |
+            type4 == "Ambulance" |
+            type5 == "Ambulance",
+        Bike_included = type1 == "Bike" |
+            type2 == "Bike" |
+            type3 == "Bike" |
+            type4 == "Bike" |
+            type5 == "Bike",
+        Bus_included = type1 == "Bus" |
+            type2 == "Bus" |
+            type3 == "Bus" |
+            type4 == "Bus" |
+            type5 == "Bus",
+        Commercial_included = type1 == "Commercial" |
+            type2 == "Commercial" |
+            type3 == "Commercial" |
+            type4 == "Commercial" |
+            type5 == "Commercial",
+        Motor_included = type1 == "Motor" |
+            type2 == "Motor" |
+            type3 == "Motor" |
+            type4 == "Motor" |
+            type5 == "Motor",
+        Sedan_included = type1 == "Sedan" |
+            type2 == "Sedan" |
+            type3 == "Sedan" |
+            type4 == "Sedan" |
+            type5 == "Sedan",
+        Special_included = type1 == "Special" |
+            type2 == "Special" |
+            type3 == "Special" |
+            type4 == "Special" |
+            type5 == "Special",
+        Trail_included = type1 == "Trail" |
+            type2 == "Trail" |
+            type3 == "Trail" |
+            type4 == "Trail" |
+            type5 == "Trail",
+        Van_included = type1 == "Van" |
+            type2 == "Van" |
+            type3 == "Van" |
+            type4 == "Van" |
+            type5 == "Van",
+        Truck_included = type1 == "Truck" |
+            type2 == "Truck" |
+            type3 == "Truck" |
+            type4 == "Truck" |
+            type5 == "Truck",
+    ) %>%
+    select(
+        `NUMBER OF PERSONS INJURED`, `NUMBER OF PERSONS KILLED`, starts_with("type"), ends_with("included")
+    )
+
+accident_included_injury <- accidents_injury_vehicle %>%
+    pivot_longer(
+        ends_with("included"),
+        "type_included"
+    ) %>%
+    filter(value) %>%
+    group_by(type_included) %>%
+    drop_na() %>%
+    summarise(
+        n = sum(`NUMBER OF PERSONS INJURED` | `NUMBER OF PERSONS KILLED`),
+        total = n(),
+        percentage = n / total,
+        percentage_opp = 1 - percentage
+    ) %>%
+    pivot_longer(
+        names_to = "Injuried",
+        starts_with("percentage"),
+        values_to = "percentage"
+    ) %>%
+    mutate(
+        Injuried = Injuried == "percentage"
+    )
+
+
+accident_included_injury %>%
+    ggplot(
+        aes(
+            x = type_included
+        )
+    ) +
+    geom_bar(
+        aes(
+            y = percentage,
+            fill = Injuried
+        ),
+        position = position_dodge2(),
+        stat = "identity",
+        group = 1
+    ) +
+    theme(
+        axis.text.x = element_text(angle = 60, hjust = 1)
+    ) + 
+    ggtitle("Percentage of Accidents Having Injured Persons For Different Types of Vehicles Included in the accident") + 
+    ylab("Percentage of Accidents Having Injured Persons") +
+    xlab("Vehicle Type") +
+    theme_bw()
+
+
 accidents_full %>%
     summarise(
         `NoFog` = sum(ifelse((Foggy + Heavy.Fog + Smoke), 0, 1), na.rm = T) / n(),
@@ -96,7 +241,7 @@ accidents_full %>%
     geom_col(fill = "steelblue")
 
 (accidents_full) %>%
-    drop_na(truck_involved) %>% 
+    drop_na(truck_involved) %>%
     group_by(truck_involved) %>%
     summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
     ggplot(
@@ -107,7 +252,7 @@ accidents_full %>%
     geom_col(fill = "steelblue")
 
 (accidents_full) %>%
-    drop_na(two_wheel_involved) %>% 
+    drop_na(two_wheel_involved) %>%
     group_by(two_wheel_involved) %>%
     summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
     ggplot(
@@ -118,7 +263,7 @@ accidents_full %>%
     geom_col(fill = "steelblue")
 
 (train_df) %>%
-    drop_na(unconcious_driver) %>% 
+    drop_na(unconcious_driver) %>%
     group_by(unconcious_driver) %>%
     summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
     ggplot(
@@ -129,7 +274,7 @@ accidents_full %>%
     geom_col(fill = "steelblue")
 
 (train_df) %>%
-    drop_na(crazy_driver) %>% 
+    drop_na(crazy_driver) %>%
     group_by(crazy_driver) %>%
     summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
     ggplot(

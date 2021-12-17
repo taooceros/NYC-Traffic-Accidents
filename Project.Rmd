@@ -199,9 +199,10 @@ train_df[samples, ] %>%
                         LONGITUDE > -73.91 & LONGITUDE < -73.89
                 )
         ),
-        alpha = 0.006
+        alpha = 0.6
     ) +
-    labs(color = "Serious Area")
+    labs(color = "Serious Area") +
+    theme(text = element_text(size = 20)) 
 ```
 
 ```{r serious accident location}
@@ -1384,5 +1385,24 @@ tibble(
 
 
 
+```{r}
+accident_c <- accidents_full %>% 
+    group_by(type1) %>% 
+    mutate(has.injury = ifelse((`NUMBER OF PERSONS INJURED` > 0 | `NUMBER OF PERSONS KILLED` > 0), 1, 0))
+
+accident_c <- accident_c %>% 
+    group_by(type1) %>% 
+    count(has.injury) %>% 
+    drop_na()
+
+
+condition <- rep(c(0, 1) , 11)
+type <- rep(accident_c$type1 %>% unique(), 2)
+ggplot(accident_c, aes(fill = as.factor(condition), y = n, x = type))+
+    geom_bar(position = position_dodge(), stat='identity') +
+    ylab("Count of accidents having injured persons") +
+    ggtitle("Count of Accidents Having Injured Persons For Different Types of Vehicles") +
+    guides(fill=guide_legend(title="Condition"))
+```
 
 

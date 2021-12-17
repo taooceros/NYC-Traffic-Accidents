@@ -95,6 +95,71 @@ accidents_full %>%
     ylab("Injury") +
     geom_col(fill = "steelblue")
 
+(accidents_full) %>%
+    drop_na(truck_involved) %>% 
+    group_by(truck_involved) %>%
+    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
+    ggplot(
+        aes(x = truck_involved, y = injury)
+    ) +
+    xlab("truck involved") +
+    ylab("Injury") +
+    geom_col(fill = "steelblue")
+
+(accidents_full) %>%
+    drop_na(two_wheel_involved) %>% 
+    group_by(two_wheel_involved) %>%
+    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
+    ggplot(
+        aes(x = two_wheel_involved, y = injury)
+    ) +
+    xlab("two wheel vehicle involved") +
+    ylab("Injury") +
+    geom_col(fill = "steelblue")
+
+(train_df) %>%
+    drop_na(unconcious_driver) %>% 
+    group_by(unconcious_driver) %>%
+    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
+    ggplot(
+        aes(x = unconcious_driver, y = injury)
+    ) +
+    xlab("unconscious driver") +
+    ylab("Injury") +
+    geom_col(fill = "steelblue")
+
+(train_df) %>%
+    drop_na(crazy_driver) %>% 
+    group_by(crazy_driver) %>%
+    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
+    ggplot(
+        aes(x = crazy_driver, y = injury)
+    ) +
+    xlab("crazy driver") +
+    ylab("Injury") +
+    geom_col(fill = "steelblue")
+
+
+(accidents_full) %>%
+    mutate(
+        snow_range = case_when(
+            SNOW == 0 | is.na(SNOW) ~ "No Snow",
+            SNOW < 0.4 * 13 ~ "Light Snow",
+            SNOW < 1.0 * 13 ~ "Moderate Snow",
+            SNOW < 2.0 * 13 ~ "Heavy Snow",
+            SNOW < 4.0 * 13 ~ "Very Heavy Snow",
+            SNOW < 10.0 * 13 ~ "Extreme Snow",
+            T ~ "Super Extreme Snow"
+        )
+    ) %>%
+    group_by(snow_range) %>%
+    summarise(injury = mean(`NUMBER OF PERSONS INJURED`, na.rm = T)) %>%
+    ggplot(
+        aes(x = `snow_range`, y = injury)
+    ) +
+    xlab("Snow Level") +
+    ylab("Injury") +
+    geom_col(fill = "steelblue")
 
 (accidents_full) %>%
     mutate(

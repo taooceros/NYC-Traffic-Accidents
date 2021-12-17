@@ -511,28 +511,24 @@ step1a.model <- glm(
     data = (train_df),
     family = "binomial"
 )
-# summary(step1a.model)
 
 step1b.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ Smoke,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1b.model)
 
 step1c.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ Heavy.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1c.model)
 
 step1d.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ Ice.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 
 step1e.model <- glm(
@@ -540,44 +536,56 @@ step1e.model <- glm(
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 step1f.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ SNOW,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
 
 step1g.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ DayLight,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
 
 step1h.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ at_crossing,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
 
 step1i.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
 
 step1j.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ truck_involved,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1i.model)
 
-# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved
+step1k.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ serious_area,
+    data = (train_df),
+    family = "binomial"
+)
+
+step1l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+step1m.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ crazy_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round1 <- tibble(
      model = c(
@@ -590,7 +598,10 @@ round1 <- tibble(
         "DayLight",
         "at_crossing",
         "two_wheel_involved",
-        "truck_involved"
+        "truck_involved",
+        "serious_area",
+        "unconcious_driver",
+        "crazy_driver"
     ),
     aic_round1 = c(
         step1a.model$aic,
@@ -602,42 +613,44 @@ round1 <- tibble(
         step1g.model$aic,
         step1h.model$aic,
         step1i.model$aic,
-        step1j.model$aic
+        step1j.model$aic,
+        step1k.model$aic,
+        step1l.model$aic,
+        step1m.model$aic
     )
 )
 
 round1 %>%
     arrange(aic_round1)
 
-# round 2 (two_wheel_involved)
+```
+
+```{r}
+# two wheel
 
 step2a.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + Foggy,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1a.model)
 
 step2b.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + Smoke,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1b.model)
 
 step2c.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + Heavy.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1c.model)
 
 step2d.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + Ice.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 
 step2e.model <- glm(
@@ -645,162 +658,200 @@ step2e.model <- glm(
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 step2f.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + SNOW,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
 
 step2g.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + DayLight,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
 
 step2h.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + at_crossing,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
+
+# i
 
 step2j.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1i.model)
+
+step2k.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + serious_area,
+    data = (train_df),
+    family = "binomial"
+)
+
+step2l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+step2m.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + crazy_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round2 <- round1 %>%
-    mutate(
+    mutate (
         aic_round2 = c(
-            step2a.model$aic,
-            step2b.model$aic,
-            step2c.model$aic,
-            step2d.model$aic,
-            step2e.model$aic,
-            step2f.model$aic,
-            step2g.model$aic,
-            step2h.model$aic,
-            0,
-            step2j.model$aic
-        )
-    )
+        step2a.model$aic,
+        step2b.model$aic,
+        step2c.model$aic,
+        step2d.model$aic,
+        step2e.model$aic,
+        step2f.model$aic,
+        step2g.model$aic,
+        step2h.model$aic,
+        0,
+        step2j.model$aic,
+        step2k.model$aic,
+        step2l.model$aic,
+        step2m.model$aic
+    ))
 
 round2 %>%
     arrange(aic_round2)
 
-# round 3 (two_wheel_involved + truck_involved)
+```
+```{r}
+# truck invovled
 
 step3a.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + Foggy,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1a.model)
 
 step3b.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + Smoke,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +Smoke,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1b.model)
 
 step3c.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + Heavy.Fog,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +Heavy.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1c.model)
 
 step3d.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + Ice.Fog,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +Ice.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 
 step3e.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + PRCP,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +PRCP,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 step3f.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + SNOW,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +SNOW,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
 
 step3g.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + DayLight,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +DayLight,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
 
 step3h.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved +at_crossing,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
+
+# i
+
+# j
+
+step3k.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + serious_area,
+    data = (train_df),
+    family = "binomial"
+)
+
+step3l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+step3m.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + crazy_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round3 <- round2 %>%
-    mutate(
+    mutate (
         aic_round3 = c(
-            step3a.model$aic,
-            step3b.model$aic,
-            step3c.model$aic,
-            step3d.model$aic,
-            step3e.model$aic,
-            step3f.model$aic,
-            step3g.model$aic,
-            step3h.model$aic,
-            0,
-            0
-        )
-    )
+        step3a.model$aic,
+        step3b.model$aic,
+        step3c.model$aic,
+        step3d.model$aic,
+        step3e.model$aic,
+        step3f.model$aic,
+        step3g.model$aic,
+        step3h.model$aic,
+        0,
+        0,
+        step3k.model$aic,
+        step3l.model$aic,
+        step3m.model$aic
+    ))
 
 round3 %>%
     arrange(aic_round3)
 
-# round 4 (two_wheel_involved + truck_involved + at_crossing)
+```
+
+```{r }
+# at_crossing
 
 step4a.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + Foggy,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1a.model)
 
 step4b.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + Smoke,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1b.model)
 
 step4c.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + Heavy.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1c.model)
 
 step4d.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + Ice.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 
 step4e.model <- glm(
@@ -808,169 +859,628 @@ step4e.model <- glm(
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 step4f.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + SNOW,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
 
 step4g.model <- glm(
     (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
+
+# h
+
+# i
+
+# j
+
+step4k.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + serious_area,
+    data = (train_df),
+    family = "binomial"
+)
+
+step4l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+step4m.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round4 <- round3 %>%
-    mutate(
+    mutate (
         aic_round4 = c(
-            step4a.model$aic,
-            step4b.model$aic,
-            step4c.model$aic,
-            step4d.model$aic,
-            step4e.model$aic,
-            step4f.model$aic,
-            step4g.model$aic,
-            0,
-            0,
-            0
-        )
-    )
+        step4a.model$aic,
+        step4b.model$aic,
+        step4c.model$aic,
+        step4d.model$aic,
+        step4e.model$aic,
+        step4f.model$aic,
+        step4g.model$aic,
+        0,
+        0,
+        0,
+        step4k.model$aic,
+        step4l.model$aic,
+        step4m.model$aic
+    ))
 
 round4 %>%
     arrange(aic_round4)
+```
 
-# round 5 (two_wheel_involved + truck_involved + at_crossing + DayLight)
-
+```{r}
+# crazy driver
 step5a.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + Foggy,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + Foggy,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1a.model)
 
 step5b.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + Smoke,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + Smoke,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1b.model)
 
 step5c.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + Heavy.Fog,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + Heavy.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1c.model)
 
 step5d.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + Ice.Fog,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + Ice.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 
 step5e.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + PRCP,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + PRCP,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 step5f.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + SNOW,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + SNOW,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1f.model)
+
+step5g.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight,
+    data = (train_df),
+    family = "binomial"
+)
+
+# h
+
+# i
+
+# j
+
+step5k.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + serious_area,
+    data = (train_df),
+    family = "binomial"
+)
+
+step5l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# m
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round5 <- round4 %>%
-    mutate(
+    mutate (
         aic_round5 = c(
-            step5a.model$aic,
-            step5b.model$aic,
-            step5c.model$aic,
-            step5d.model$aic,
-            step5e.model$aic,
-            step5f.model$aic,
-            0,
-            0,
-            0,
-            0
-        )
-    )
+        step5a.model$aic,
+        step5b.model$aic,
+        step5c.model$aic,
+        step5d.model$aic,
+        step5e.model$aic,
+        step5f.model$aic,
+        step5g.model$aic,
+        0,
+        0,
+        0,
+        step5k.model$aic,
+        step5l.model$aic,
+        0
+    ))
 
 round5 %>%
     arrange(aic_round5)
+```
 
-# round 6 (two_wheel_involved + truck_involved + at_crossing + DayLight + SNOW)
-
+```{r}
+# DayLight
 step6a.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + SNOW + Foggy,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + Foggy,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1a.model)
 
 step6b.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + SNOW + Smoke,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + Smoke,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1b.model)
 
 step6c.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + SNOW + Heavy.Fog,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + Heavy.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1c.model)
 
 step6d.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + SNOW + Ice.Fog,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + Ice.Fog,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
 
 step6e.model <- glm(
-    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + DayLight + SNOW + PRCP,
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + PRCP,
     data = (train_df),
     family = "binomial"
 )
-# summary(step1d.model)
 
+step6f.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + SNOW,
+    data = (train_df),
+    family = "binomial"
+)
+
+# g
+
+# h
+
+# i
+
+# j
+
+step6k.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area,
+    data = (train_df),
+    family = "binomial"
+)
+
+step6l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# m
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
 
 round6 <- round5 %>%
-    mutate(
+    mutate (
         aic_round6 = c(
-            step5a.model$aic,
-            step5b.model$aic,
-            step5c.model$aic,
-            step5d.model$aic,
-            step5e.model$aic,
-            0,
-            0,
-            0,
-            0,
-            0
-        )
-    )
+        step6a.model$aic,
+        step6b.model$aic,
+        step6c.model$aic,
+        step6d.model$aic,
+        step6e.model$aic,
+        step6f.model$aic,
+        0,
+        0,
+        0,
+        0,
+        step6k.model$aic,
+        step6l.model$aic,
+        0
+    ))
 
 round6 %>%
     arrange(aic_round6)
 
-# round 7 ()
+```
+
+
+```{r}
+# serious_area
+step7a.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + Foggy,
+    data = (train_df),
+    family = "binomial"
+)
+
+step7b.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + Smoke,
+    data = (train_df),
+    family = "binomial"
+)
+
+step7c.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + Heavy.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+step7d.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + Ice.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+
+step7e.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + PRCP,
+    data = (train_df),
+    family = "binomial"
+)
+
+step7f.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW,
+    data = (train_df),
+    family = "binomial"
+)
+
+step7l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# m
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
+
+round7 <- round6 %>%
+    mutate (
+        aic_round7 = c(
+        step7a.model$aic,
+        step7b.model$aic,
+        step7c.model$aic,
+        step7d.model$aic,
+        step7e.model$aic,
+        step7f.model$aic,
+        0,
+        0,
+        0,
+        0,
+        0,
+        step7l.model$aic,
+        0
+    ))
+
+round7 %>%
+    arrange(aic_round7)
+```
+
+
+```{r}
+# SNOW 
+step8a.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + Foggy,
+    data = (train_df),
+    family = "binomial"
+)
+
+step8b.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + Smoke,
+    data = (train_df),
+    family = "binomial"
+)
+
+step8c.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + Heavy.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+step8d.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + Ice.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+
+step8e.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP,
+    data = (train_df),
+    family = "binomial"
+)
+
+step8l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# m
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
+
+round8 <- round7 %>%
+    mutate (
+        aic_round8 = c(
+        step8a.model$aic,
+        step8b.model$aic,
+        step8c.model$aic,
+        step8d.model$aic,
+        step8e.model$aic,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        step8l.model$aic,
+        0
+    ))
+
+round8 %>%
+    arrange(aic_round8)
+```
+
+
+```{r}
+# PRCP
+step9a.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Foggy,
+    data = (train_df),
+    family = "binomial"
+)
+
+step9b.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke,
+    data = (train_df),
+    family = "binomial"
+)
+
+step9c.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Heavy.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+step9d.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Ice.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+step9l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
+
+round9 <- round8 %>%
+    mutate (
+        aic_round9 = c(
+        step9a.model$aic,
+        step9b.model$aic,
+        step9c.model$aic,
+        step9d.model$aic,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        step9l.model$aic,
+        0
+    ))
+
+round9 %>%
+    arrange(aic_round9)
+
+```
+```{r}
+# Smoke
+step10a.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke + Foggy,
+    data = (train_df),
+    family = "binomial"
+)
+
+step10c.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke + Heavy.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+step10d.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke + Ice.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+step10l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
+
+round10 <- round9 %>%
+    mutate (
+        aic_round10 = c(
+        step10a.model$aic,
+        0,
+        step10c.model$aic,
+        step10d.model$aic,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        step10l.model$aic,
+        0
+    ))
+
+round10 %>%
+    arrange(aic_round10)
+
+```
+```{r}
+# Foggy
+step11c.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke + Foggy + Heavy.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+step11d.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke + Foggy + Ice.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+step11l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke + Foggy + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
+
+round11 <- round10 %>%
+    mutate (
+        aic_round11 = c(
+        0,
+        0,
+        step11c.model$aic,
+        step11d.model$aic,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        step11l.model$aic,
+        0
+    ))
+
+round11 %>%
+    arrange(aic_round11)
 
 ```
 
 
+```{r}
+# Ice.Fog
+step12c.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke + Foggy + Ice.Fog + Heavy.Fog,
+    data = (train_df),
+    family = "binomial"
+)
 
+step12l.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke + Foggy + Ice.Fog + unconcious_driver,
+    data = (train_df),
+    family = "binomial"
+)
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
+
+round12 <- round11 %>%
+    mutate (
+        aic_round12 = c(
+        0,
+        0,
+        step12c.model$aic,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        step12l.model$aic,
+        0
+    ))
+
+round12 %>%
+    arrange(aic_round12)
+
+```
+
+```{r}
+# unconcious_driver
+step13c.model <- glm(
+    (`NUMBER OF PERSONS INJURED` > 0) ~ two_wheel_involved + truck_involved + at_crossing + crazy_driver + DayLight + serious_area + SNOW + PRCP + Smoke + Foggy + Ice.Fog + unconcious_driver + Heavy.Fog,
+    data = (train_df),
+    family = "binomial"
+)
+
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
+
+round13 <- round12 %>%
+    mutate (
+        aic_round13 = c(
+        0,
+        0,
+        step13c.model$aic,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    ))
+
+round13 %>%
+    arrange(aic_round13)
+
+```
+```{r}
+# Foggy + Smoke + Heavy.Fog  + Ice.Fog + PRCP + SNOW + DayLight + at_crossing + two_wheel_involved + truck_involved + serious_area + unconcious_driver + crazy_driver
+
+model_selection <- round13 %>%
+    mutate (
+        aic_round14 = c(
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    ))
+
+model_selection %>%
+    head(11)
+```
 
 ```{r randomForest}
 library(randomForest)
